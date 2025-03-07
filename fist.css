@@ -4,19 +4,7 @@
 	position: relative;
 }
 
-@keyframes close_combat {
-	0% {
-		transform: scale(0.1);
-		animation-timing-function: ease-out;
-	}
-	50% {
-		transform: scale(2);
-		animation-timing-function: ease-in;
-	}
-	100% {
-		transform: scale(0.1);
-	}
-}
+
 
 /* All the body-level effects should only apply when .anger-active is present */
 body.anger-active {
@@ -256,4 +244,4 @@ body.anger-active.was-cooldown .fist-element {
 	to {
 		opacity: 1;
 	}
-}
+}	
