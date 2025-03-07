@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mood Studio</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="section joy">
+        <div class="light-circle sun"></div>
+        </div>
+
+        <div class="section calm">Calme</div>
+        <div class="section surprise">Surprise</div>
+        <div class="section anger">
+            <canvas id="fist" ></canvas>
+        </div>
+        <div class="section sadness">Tristesse</div>
+        <div class="section fear">Peur</div>
+    </div>
+    
+    <div class="nav-buttons">
+        <button onclick="scrollToSection(0)">Joie</button>
+        <button onclick="scrollToSection(1)">Calme</button>
+        <button onclick="scrollToSection(2)">Surprise</button>
+        <button onclick="scrollToSection(3)">colère</button>
+        <button onclick="scrollToSection(4)">Tristesse</button>
+        <button onclick="scrollToSection(5)">Peur</button>
+    </div>
+
+    <script src="index.js"></script>
+    <script src="sun.js"></script>
+    <script src="fist.js"></script>
+</body>
+</html>
