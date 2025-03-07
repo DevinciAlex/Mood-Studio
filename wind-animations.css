@@ -1,0 +1,50 @@
+/* Wind Path Animation Styles */
+.wind-path {
+	transition: opacity 0.2s ease;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* Different styles for different wind path types */
+.wind-path:not(.looping):not(.complex-loop):not(.ribbon) {
+	stroke-width: 2;
+	stroke: rgba(255, 255, 255, 0.65);
+	filter: blur(0.6px);
+}
+
+.wind-path.looping {
+	stroke-width: 2.2;
+	stroke: rgba(255, 255, 255, 0.75);
+	filter: blur(0.7px);
+}
+
+.wind-path.complex-loop {
+	stroke-width: 2.1;
+	stroke: rgba(255, 255, 255, 0.7);
+	filter: blur(0.7px);
+}
+
+.wind-path.spiral {
+	stroke-width: 1.8;
+	stroke: rgba(255, 255, 255, 0.5);
+	filter: blur(0.7px);
+}
+
+.wind-path.ribbon {
+	stroke-width: 2.5;
+	stroke: rgba(255, 255, 255, 0.45);
+	filter: blur(0.8px);
+}
+
+/* Add subtle shadow for depth */
+.wind-path.looping,
+.wind-path.complex-loop {
+	filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.25));
+}
+
+/* Ensure rendering is optimized for animation */
+.wind-svg {
+	transform: translateZ(0);
+	will-change: transform;
+	backface-visibility: hidden;
+}

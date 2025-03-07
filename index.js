@@ -3,6 +3,28 @@ const totalSections = 6;
 let isScrolling = false;
 let angerCooldown = false;
 
+document.addEventListener("DOMContentLoaded", () => {
+	// Simulate loading time (remove in production)
+	setTimeout(() => {
+		const loader = document.getElementById("loader-wrapper");
+		const mainContent = document.getElementById("main-content");
+
+		// Hide loader
+		loader.classList.add("loader-hidden");
+
+		// Show main content
+		mainContent.classList.add("visible");
+
+		// Remove loader after transition
+		loader.addEventListener("transitionend", () => {
+			document.body.removeChild(loader);
+		});
+	}, 2000); // 2 seconds loading simulation
+
+	updateActiveButton(0);
+	updateSectionEffects(0);
+});
+
 function scrollToSection(index) {
 	if (isScrolling) return;
 
@@ -126,9 +148,4 @@ document.addEventListener("keydown", ({ key }) => {
 	} else if (key === "ArrowLeft" && currentSection > 0) {
 		scrollToSection(currentSection - 1);
 	}
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-	updateActiveButton(0);
-	updateSectionEffects(0);
 });
