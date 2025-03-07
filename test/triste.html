@@ -3,73 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ambiance Triste</title>
+    <title>Sous la pluie - Version optimisée</title>
     <style>
         body {
-            background: linear-gradient(to bottom, #2C3E50, #34495E);
-
-            color: #D0D3D4;
-            font-family: 'Lora', serif;
-            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #0a1017;
+            color: #e0e0e0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .container {
+            position: relative;
             width: 100vw;
             height: 100vh;
+            overflow: hidden;
         }
 
-        h1 {
-            opacity: 0;
-            animation: fadeIn 3s ease-in forwards;
+        .man {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            width: 200px;
+            z-index: 100;
+            animation: sway 3s ease-in-out infinite alternate;
         }
-
-        p {
-            opacity: 0.8;
-            font-style: italic;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .rain {
-            position: fixed;
-            top: 0;
-            left: 0;
+        
+        .night-sky {
+            position: absolute;
             width: 100%;
             height: 100%;
+            background: linear-gradient(to bottom, #0a1017 0%, #1c2b3e 100%);
+        }
+        
+        .clouds {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(ellipse at 60% 30%, rgba(90, 90, 90, 0.6) 0%, rgba(30, 30, 30, 0) 70%),
+                radial-gradient(ellipse at 30% 20%, rgba(80, 80, 80, 0.7) 0%, rgba(30, 30, 30, 0) 65%),
+                radial-gradient(ellipse at 80% 40%, rgba(60, 60, 60, 0.8) 0%, rgba(30, 30, 30, 0) 55%);
+            filter: blur(3px);
+        }
+                
+        .puddle {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(30, 40, 50, 0.8);
+            box-shadow: 0 0 20px 10px rgba(30, 40, 50, 0.6);
+        }
+        
+        /* Gouttes de pluie */
+        .rain-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+        
+        .rain-drop {
+            position: absolute;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.6));
+            width: 1px;
+            height: 20px;
+            transform: rotate(20deg);
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translate(0, -100px) rotate(20deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(50px, 100vh) rotate(20deg);
+                opacity: 0.5;
+            }
+        }
+        
+        /* Ondulations éclipsées */
+        .elipse-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 70%;
+            z-index: 15;
             pointer-events: none;
         }
-
-        .raindrop {
+        
+        .elipse-ripple {
             position: absolute;
-            width: 2px;
-            height: 15px;
-            background: rgba(255, 255, 255, 0.3);
-            top: -10px;
-            animation: rain 1.5s linear infinite;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            transform: translate(-50%, -50%) scale(0);
+            animation: elipse-effect 1s ease-out forwards;
+            filter: blur(2px);
+            box-shadow: 0 0 10px rgba(150, 220, 255, 0.5);
+        }
+        
+        @keyframes elipse-effect {
+            0% {
+            transform: translate(-50%, -50%) scaleX(0) scaleY(0);
+            opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scaleX(4) scaleY(1);
+                opacity: 0;
+            }
+        }
+        
+        /* Reflet */
+        .reflection {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%) scaleY(-0.15) blur(1px);
+            opacity: 0.2;
+            filter: blur(1px);
         }
 
-        @keyframes rain {
-            from { transform: translateY(-100vh); }
-            to { transform: translateY(100vh); }
+        .shadow {
+            position: absolute;
+            top:80%;
+            left: 60%;
+            rotate: -45deg;
+            width: 120px; /* Largeur de l'ombre */
+            height: 220px; /* Hauteur de l'ombre */
+            background: radial-gradient(ellipse, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 80%);
+            transform: translateX(-50%);
+            z-index: 1;
         }
+
     </style>
 </head>
 <body>
-    <div class="rain"></div>
+    <div class="container">
+        <div class="night-sky"></div>
+        <div class="clouds"></div>
+        
+        <div class="rain-container" id="rain-container"></div>
+        <div class="elipse-container" id="elipse-container"></div>
+        
+        <div class="puddle"></div>
+        <img src="umbrella.jpg" class="man" alt="Homme sous la pluie">
+        <div class="shadow"></div>
+
+
+    </div>
 
     <script>
+        // Configuration de la pluie
+        const rainConfig = {
+            dropCount: 500,
+            minSpeed: 1.2,
+            maxSpeed: 3.0,
+            minLength: 10,
+            maxLength: 25,
+            minOpacity: 0.2,
+            maxOpacity: 0.6,
+            minAngle: 15,
+            maxAngle: 25
+        };
+        
+        // Configuration des ondulations éclipsées
+        const elipseConfig = {
+            minSize: 5,
+            maxSize: 30,
+            minDuration: 1,
+            maxDuration: 2,
+            interval: 4, // ms entre les ondulations
+            minY: 100,  
+            maxY: 500   
+        };
+        
+        // Conteneurs
+        const rainContainer = document.getElementById('rain-container');
+        const elipseContainer = document.getElementById('elipse-container');
+        
+        // Fonction pour générer un nombre aléatoire dans un intervalle
+        function randomBetween(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        
+        // Créer les gouttes de pluie
         function createRain() {
-            const rainContainer = document.querySelector('.rain');
-            for (let i = 0; i < 100; i++) {
-                let drop = document.createElement('div');
-                drop.classList.add('raindrop');
-                drop.style.left = `${Math.random() * 100}vw`;
-                drop.style.animationDuration = `${Math.random() * 1 + 1}s`;
+            for (let i = 0; i < rainConfig.dropCount; i++) {
+                const drop = document.createElement('div');
+                drop.classList.add('rain-drop');
+                
+                // Position aléatoire
+                const posX = Math.random() * 120 - 10; // Parfois en dehors de l'écran pour plus de réalisme
+                drop.style.left = posX + 'vw';
+                
+                // Taille aléatoire
+                const length = randomBetween(rainConfig.minLength, rainConfig.maxLength);
+                drop.style.height = length + 'px';
+                
+                // Opacité aléatoire
+                const opacity = randomBetween(rainConfig.minOpacity, rainConfig.maxOpacity);
+                drop.style.opacity = opacity;
+                
+                // Angle aléatoire
+                const angle = randomBetween(rainConfig.minAngle, rainConfig.maxAngle);
+                drop.style.transform = `rotate(${angle}deg)`;
+                
+                // Vitesse aléatoire
+                const speed = randomBetween(rainConfig.minSpeed, rainConfig.maxSpeed);
+                const duration = 1 / speed;
+                drop.style.animationDuration = duration + 's';
+                
+                // Délai aléatoire
+                const delay = Math.random() * 2;
+                drop.style.animationDelay = delay + 's';
+                
                 rainContainer.appendChild(drop);
             }
         }
-        createRain();
+        
+        // Créer les ondulations éclipsées
+        function createElipseRipples() {
+            // Ajuster la hauteur maximale en fonction de la taille de l'écran
+            elipseConfig.maxY = Math.min(window.innerHeight - 100, 500);
+            
+            // Créer une ondulation à intervalles réguliers
+            setInterval(() => {
+                createElipseRipple();
+            }, elipseConfig.interval);
+        }
+        
+        function createElipseRipple() {
+            const ripple = document.createElement('div');
+            ripple.classList.add('elipse-ripple');
+            
+            // Position aléatoire (plus haute que les versions précédentes)
+            const posX = Math.random() * window.innerWidth;
+            const posY = randomBetween(elipseConfig.minY, elipseConfig.maxY);
+            
+            ripple.style.left = posX + 'px';
+            ripple.style.top = posY + 'px';
+            
+            // Taille de base aléatoire
+            const size = randomBetween(elipseConfig.minSize, elipseConfig.maxSize);
+            ripple.style.width = size + 'px';
+            ripple.style.height = size + 'px';
+            
+            // Durée aléatoire
+            const duration = randomBetween(elipseConfig.minDuration, elipseConfig.maxDuration);
+            ripple.style.animationDuration = duration + 's';
+            
+            // Couleur légèrement aléatoire pour un effet plus dynamique
+            const hue = randomBetween(200, 220); // Bleu
+            const saturation = randomBetween(50, 90);
+            const lightness = randomBetween(60, 90);
+            ripple.style.borderColor = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.6)`;
+            
+            // Ajouter au DOM
+            elipseContainer.appendChild(ripple);
+            
+            // Supprimer après l'animation
+            setTimeout(() => {
+                ripple.remove();
+            }, duration * 1000);
+        }
+        
+        // Initialiser la scène
+        window.addEventListener('load', () => {
+            createRain();
+            createElipseRipples();
+            
+            // Créer quelques ondulations initiales
+            for (let i = 0; i < 10; i++) {
+                setTimeout(createElipseRipple, i * 100);
+            }
+        });
     </script>
-
 </body>
 </html>
+
