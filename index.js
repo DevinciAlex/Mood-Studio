@@ -15,6 +15,17 @@ function scrollToSection(index) {
     setTimeout(() => isScrolling = false, 1600);
 }
 
+function updateActiveButton(index) {
+    const buttons = document.querySelectorAll('.nav-buttons button');
+    buttons.forEach((button, i) => {
+        if (i === index) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
+}
+
 document.addEventListener('wheel', (event) => {
     event.preventDefault();
     

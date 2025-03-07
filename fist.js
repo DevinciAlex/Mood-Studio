@@ -39,16 +39,20 @@ function drawFist(xOffset, yOffset) {
     ctx.lineTo(35 + xOffset, 75 + yOffset);
     ctx.lineTo(33 + xOffset, 117 + yOffset);
     ctx.lineTo(15 + xOffset, 117 + yOffset);
-    ctx.stroke();
+    ctx.closePath();
     ctx.fillStyle = "red";
     ctx.fill();
+    ctx.strokeStyle = "#800000";
+    ctx.linewidth = 2;
+    ctx.stroke();
 }
 
 function animateFist() {
     let x = (canvas.width/2 - 75);
     let y = (canvas.height/2- 75);
     drawFist(x, y); 
-    canvas.classList.add("fist");
 }
 
-animateFist();
+document.addEventListener("DOMContentLoaded", () => {
+    animateFist();
+});

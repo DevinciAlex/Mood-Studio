@@ -8,10 +8,13 @@ body {
 }
 .container {
     display: flex;
-    width: 600vw; /* Changé de 300vw à 600vw pour 6 sections */
+    width: 600vw;
     height: 100vh;
     transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
     scroll-behavior: smooth;
+}
+::-webkit-scrollbar {
+    display: none;
 }
 .section {
     width: 100vw;
@@ -136,11 +139,11 @@ body {
 @keyframes close_combat {
     0% {
         transform: scale(0.1);
-        transition-timing-function: ease-out ;
+        animation-timing-function: ease-out ;
     }
     50% {
         transform: scale(2);
-        transition-timing-function: ease-in;
+        animation-timing-function: ease-in;
     }
     100% {
         transform: scale(0.1);
@@ -148,12 +151,13 @@ body {
 }
 
 .nav-buttons {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     gap: 10px;
+    z-index: 100;
 }
 .nav-buttons button {
     padding: 10px 20px;
