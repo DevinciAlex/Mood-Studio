@@ -1,0 +1,21 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+}
+
+#fist {
+    animation: close_combat 0.5s infinite forwards;
+}
+
+@keyframes close_combat {
+    0% {
+        transform: scale(0.1);
+    }
+    100% {
+        transform: scale(1.2);
+    }
+}

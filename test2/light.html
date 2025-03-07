@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cercles de Joie</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        .light-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(20px);
+            background: radial-gradient(circle at center, 
+                rgba(255,255,255,0.9) 0%,
+                rgba(255,255,0,0.8) 30%,    /* Jaune vif */
+                rgba(255,166,0,0.6) 60%,    /* Orange chaleureux */
+                rgba(255,140,0,0) 100%);    /* Orange foncé */
+                opacity: 0;
+                animation: fadeIn 1s forwards, pulse 2s infinite;
+                transition: opacity 0.5s ease-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <script>
+        // 1. Correction de la classe LightCircle
+        class LightCircle {
+            constructor(size) {
+                this.size = size;
+                this.x = 0;
+                this.y = 0;
+                this.element = document.createElement('div');
+                this.element.className = 'light-circle';
+                this.element.style.width = `${size}px`;
+                this.element.style.height = `${size}px`;
+                const colors = [
+                    'rgba(255,255,0,0.8)',   // Jaune vif
+                    'rgba(255,192,203,0.8)', // Rose
+                    'rgba(255,140,0,0.8)',   // Orange
+                    'rgba(255,20,147,0.8)',  // Rose vif
+                    'rgba(255,215,0,0.8)',   // Or
+                    'rgba(138,43,226,0.8)'   // Violet
+                ];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                this.element.style.background = `radial-gradient(circle at center, 
+                    rgba(255,255,255,0.9) 0%,
+                    ${randomColor} 40%,
+                    rgba(255,236,179,0.4) 70%,
+                    rgba(255,236,179,0) 100%)`;
+            }
+
+            setPosition(x, y) {
+                this.x = x;
+                this.y = y;
+                this.element.style.left = `${x}px`;
+                this.element.style.top = `${y}px`;
+            }
+
+            intersects(other) {
+                const dx = this.x - other.x;
+                const dy = this.y - other.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const minDistance = (this.size + other.size) / 2; // Utiliser le rayon au lieu du diamètre
+                return distance < minDistance;
+            }
+
+            // Ajouter une méthode de destruction propre
+            destroy() {
+                this.element.remove();
+            }
+            
+            // Ajouter une méthode pour l'animation
+            animate() {
+                this.element.style.animation = `fadeIn 2s forwards, pulse ${2 + Math.random() * 2}s infinite`;
+            }
+        }
+
+        // 2. Création d'une variable globale pour stocker tous les cercles
+        const allLights = [];
+
+        // 3. Modification de la fonction createLights
+        function createLights(count) {
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            for (let i = 0; i < count; i++) {
+                const light = new LightCircle(
+                    Math.random() * (180 - 120) + 120
+                );
+                if (positionLight(light, viewportWidth, viewportHeight)) {
+                    allLights.push(light); // Ajouter au tableau global
+                }
+            }
+        }
+
+        // Séparer la logique de positionnement
+        function positionLight(light, width, height) {
+            const maxAttempts = 50;
+            let attempts = 0;
+
+            while (attempts < maxAttempts) {
+                light.setPosition(
+                    Math.random() * (width - light.size),
+                    Math.random() * (height - light.size)
+                );
+                
+                if (!allLights.some(other => light.intersects(other))) {
+                    document.body.appendChild(light.element);
+                    light.animate();
+                    return true;
+                }
+                attempts++;
+            }
+            return false;
+        }
+
+        // 4. Modification de la fonction animateLights
+        function animateLights() {
+            // Supprimer un cercle aléatoire
+            if (allLights.length > 0) {
+                const randomIndex = Math.floor(Math.random() * allLights.length);
+                const lightToRemove = allLights[randomIndex];
+                lightToRemove.destroy();
+                allLights.splice(randomIndex, 1);
+            }
+
+            // Ajouter un nouveau cercle
+            createLights(1);
+        }
+
+        // Ajouter la réactivité au redimensionnement
+        window.addEventListener('resize', debounce(() => {
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            allLights.forEach(light => {
+                if (light.x > viewportWidth || light.y > viewportHeight) {
+                    light.destroy();
+                    allLights.splice(allLights.indexOf(light), 1);
+                    createLights(1);
+                }
+            });
+        }, 250));
+
+        // Fonction utilitaire debounce
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        createLights(10); // Création initiale
+        setInterval(() => {animateLights();}, 2000);
+    </script>
+</body>
+</html>
