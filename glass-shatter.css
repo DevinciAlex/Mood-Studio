@@ -1,0 +1,186 @@
+/* Glass shatter effect container */
+.glass-shatter-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 1000;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s;
+}
+
+.glass-shatter-container.active {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* Individual shards */
+.glass-shard {
+	position: absolute;
+	background: linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0.4),
+		rgba(255, 255, 255, 0.1)
+	);
+	box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+	border-radius: 2px;
+	transform-origin: center center;
+	animation: shardFly 1s forwards cubic-bezier(0.36, 0.07, 0.19, 0.97);
+	transition: transform 0.3s ease-out;
+	backdrop-filter: blur(2px);
+}
+
+.glass-shard.reflective {
+	background: linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0.9),
+		rgba(255, 255, 255, 0.3)
+	);
+	box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Flash overlay */
+.glass-flash {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: white;
+	opacity: 0;
+	z-index: 999;
+	pointer-events: none;
+	animation: flash 0.3s forwards;
+}
+
+/* Lines overlay */
+.crack-lines {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 998;
+	pointer-events: none;
+	opacity: 0;
+	animation: crackFadeIn 0.2s forwards, crackFadeOut 1s 1.8s forwards;
+}
+
+.crack-line {
+	position: absolute;
+	background: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0),
+		rgba(255, 255, 255, 0.8),
+		rgba(255, 255, 255, 0)
+	);
+	transform-origin: center left;
+	height: 1px;
+	width: 0%;
+	animation: lineGrow 0.4s forwards;
+}
+
+.crack-line.branch {
+	height: 1px;
+	opacity: 0.7;
+	filter: blur(0.5px);
+}
+
+/* Animations */
+@keyframes flash {
+	0% {
+		opacity: 0;
+	}
+	50% {
+		opacity: 0.9;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes shardFly {
+	0% {
+		opacity: 1;
+		transform: translate(0, 0) rotate(0deg);
+	}
+	100% {
+		opacity: 0;
+		transform: translate(var(--tx), var(--ty)) rotate(var(--tr));
+	}
+}
+
+@keyframes lineGrow {
+	0% {
+		width: 0%;
+		opacity: 0;
+	}
+	30% {
+		opacity: 1;
+	}
+	100% {
+		width: 100%;
+		opacity: 0.5;
+	}
+}
+
+@keyframes crackFadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes crackFadeOut {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+/* Shimmer effect for glass shards */
+.glass-shard::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(255, 255, 255, 0.4) 50%,
+		rgba(255, 255, 255, 0) 100%
+	);
+	animation: shardShimmer 1s infinite alternate;
+}
+
+@keyframes shardShimmer {
+	0% {
+		opacity: 0.3;
+	}
+	100% {
+		opacity: 0.8;
+	}
+}
+
+.delayed-fade {
+	opacity: 0;
+	animation: delayedFadeIn 2s forwards 1s !important;
+}
+
+@keyframes delayedFadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
