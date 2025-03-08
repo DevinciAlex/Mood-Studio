@@ -14,11 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Show main content
 		mainContent.classList.add("visible");
-
-		// Remove loader after transition
-		loader.addEventListener("transitionend", () => {
-			document.body.removeChild(loader);
-		});
 	}, 2000); // 2 seconds loading simulation
 
 	updateActiveButton(0);
