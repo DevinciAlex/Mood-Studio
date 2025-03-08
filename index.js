@@ -72,9 +72,6 @@ function setupAngerEffects() {
 		rageTitle.textContent = "FURY UNLEASHED";
 		document.body.appendChild(rageTitle);
 	}
-
-	// Setup glass break effect on click
-	document.querySelector(".anger").addEventListener("click", triggerGlassBreak);
 }
 
 // Remove anger section effects
@@ -83,11 +80,6 @@ function removeAngerEffects() {
 	if (rageTitle) {
 		rageTitle.remove();
 	}
-
-	// Remove glass break event listener
-	document
-		.querySelector(".anger")
-		?.removeEventListener("click", triggerGlassBreak);
 }
 
 // Trigger glass break effect
@@ -140,12 +132,16 @@ document.addEventListener(
 	{ passive: false }
 );
 
-document.addEventListener("keydown", ({ key }) => {
-	if (isScrolling) return;
+document.addEventListener("keydown", (event) => {
+	if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+		event.preventDefault();
 
-	if (key === "ArrowRight" && currentSection < totalSections - 1) {
-		scrollToSection(currentSection + 1);
-	} else if (key === "ArrowLeft" && currentSection > 0) {
-		scrollToSection(currentSection - 1);
+		if (isScrolling) return;
+
+		if (event.key === "ArrowRight" && currentSection < totalSections - 1) {
+			scrollToSection(currentSection + 1);
+		} else if (event.key === "ArrowLeft" && currentSection > 0) {
+			scrollToSection(currentSection - 1);
+		}
 	}
 });

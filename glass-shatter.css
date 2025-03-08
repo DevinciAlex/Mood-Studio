@@ -12,11 +12,6 @@
 	transition: opacity 0.3s;
 }
 
-.glass-shatter-container.active {
-	opacity: 1;
-	visibility: visible;
-}
-
 /* Individual shards */
 .glass-shard {
 	position: absolute;

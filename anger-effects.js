@@ -35,17 +35,6 @@ class AngerEffects {
 				document.body.appendChild(rageTitle);
 				this.fistElements.push(rageTitle);
 			}
-
-			// Setup glass break on click with delay
-			const angerSection = document.querySelector(".anger");
-			if (angerSection) {
-				setTimeout(() => {
-					angerSection.addEventListener(
-						"click",
-						this.triggerGlassBreak.bind(this)
-					);
-				}, 1000); // Delay click handler
-			}
 		}, 800); // Wait for section transition
 	}
 
@@ -62,15 +51,6 @@ class AngerEffects {
 			}
 		});
 		this.fistElements = [];
-
-		// Remove event listeners
-		const angerSection = document.querySelector(".anger");
-		if (angerSection) {
-			angerSection.removeEventListener(
-				"click",
-				this.triggerGlassBreak.bind(this)
-			);
-		}
 
 		// Remove any glass shatter elements
 		const shatterContainer = document.querySelector(".glass-shatter-container");

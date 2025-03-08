@@ -789,7 +789,7 @@ class GlassBreak {
 
 			// Create main break points at each crack endpoint
 			for (const crack of this.cracks) {
-				if (Math.random() < 0.3) continue; // Skip some endpoints
+				if (Math.random() < 0.5) continue; // Skip some endpoints
 
 				const x = crack.x2;
 				const y = crack.y2;
