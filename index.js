@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Show main content
 		mainContent.classList.add("visible");
-	}, 2000); // 2 seconds loading simulation
+	}, 1000); // 2 seconds loading simulation
 
 	updateActiveButton(0);
 	updateSectionEffects(0);

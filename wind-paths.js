@@ -27,7 +27,7 @@ class WindPathGenerator {
 	generateWavyPath(baseY) {
 		const amplitude = 15 + Math.random() * 15; // Reduced amplitude
 		const segments = 12; // More segments for smoother curves
-		const segmentWidth = 1500 / segments;
+		const segmentWidth = 2000 / segments; // Increased from 1650 to 2000
 
 		let d = `M-200,${this.addWaveEffect(baseY)}`;
 
@@ -90,11 +90,11 @@ class WindPathGenerator {
 			baseY - loopHeight + offsetY
 		)} ${loopX - offsetX},${y1} ${loopX},${y1}
                 C${loopX + 150},${this.addWaveEffect(baseY + 5)} ${
-			loopX + 300
-		},${this.addWaveEffect(baseY - 15)} ${loopX + 500},${this.addWaveEffect(
+			loopX + 400
+		},${this.addWaveEffect(baseY - 15)} ${loopX + 700},${this.addWaveEffect(
 			baseY - 5
 		)}
-                C${loopX + 650},${this.addWaveEffect(baseY + 2)} 1300,${yEnd}`;
+                C${loopX + 900},${this.addWaveEffect(baseY + 2)} 1700,${yEnd}`; // Extended to 1700
 	}
 
 	generateDoubleLoopPath(baseY) {
@@ -153,13 +153,13 @@ class WindPathGenerator {
 			baseY - loopHeight + offsetY
 		)} ${loop2X - offsetX},${y1} ${loop2X},${y1}
                 C${loop2X + 150},${this.addWaveEffect(baseY + 5)} ${
-			loop2X + 300
-		},${this.addWaveEffect(baseY - 10)} 1300,${yEnd}`;
+			loop2X + 400
+		},${this.addWaveEffect(baseY - 10)} 1700,${yEnd}`; // Extended to 1700
 	}
 }
 
 class WindAnimation {
-	constructor() {
+	constructor(options = {}) {
 		this.pathGenerator = new WindPathGenerator();
 		this.svg = document.querySelector(".wind-svg");
 		this.active = false;
@@ -167,23 +167,85 @@ class WindAnimation {
 		this.lastTimestamp = 0;
 		this.paths = [];
 		this.animate = this.animate.bind(this);
+		this.pendingRegeneration = new Map();
+		this.newPaths = new Map();
+		this.regenerationDelay = 2500;
+		this.animationStartDelay = 500;
+
+		this.config = {
+			pathCount: options.pathCount || 6,
+			minPathCount: 1,
+			maxPathCount: 10,
+		};
+
 		this.init();
+	}
+
+	// Update the number of paths
+	setPathCount(count) {
+		// Validate and parse as integer
+		count = parseInt(count);
+		if (isNaN(count)) return;
+
+		// Enforce boundaries
+		count = Math.max(
+			this.config.minPathCount,
+			Math.min(count, this.config.maxPathCount)
+		);
+
+		console.log(`Setting path count to ${count}`);
+
+		// Only update if count has changed
+		if (count === this.config.pathCount) return;
+
+		this.config.pathCount = count;
+
+		// Always reinitialize - more reliable than conditional
+		this.reinitializePaths();
+
+		return count;
+	}
+
+	reinitializePaths() {
+		console.log("Reinitializing paths with count:", this.config.pathCount);
+
+		// Clear any pending operations
+		this.pendingRegeneration.clear();
+		this.newPaths.clear();
+
+		// Clear all existing paths
+		if (this.svg) {
+			this.svg.innerHTML = "";
+		}
+
+		// Initialize fresh with new path count
+		this.init();
+
+		// If animation was active, restart it
+		if (this.active) {
+			this.active = false; // Force reset
+			this.activateAnimation();
+		}
 	}
 
 	init() {
 		if (!this.svg) return;
 
 		const pathTypes = ["simple", "loop", "doubleLoop"];
-		const ySpacing = 120; // Reduced spacing between paths
-		const baseY = 150; // Start higher up
+		const ySpacing = 120;
+		const baseY = 150;
 
 		// Clear existing paths
 		this.svg.innerHTML = "";
+		this.pendingRegeneration.clear();
+		this.newPaths.clear();
 
-		// Generate new paths
-		for (let i = 0; i < 6; i++) {
-			// Increased number of paths
-			const type = pathTypes[Math.floor(Math.random() * pathTypes.length)];
+		// Generate new paths with guaranteed randomness
+		for (let i = 0; i < this.config.pathCount; i++) {
+			// Truly random type selection
+			const typeIndex = Math.floor(Math.random() * 3);
+			const type = pathTypes[typeIndex];
+
 			const path = document.createElementNS(
 				"http://www.w3.org/2000/svg",
 				"path"
@@ -199,17 +261,53 @@ class WindAnimation {
 
 		this.paths = Array.from(this.svg.querySelectorAll(".wind-path"));
 
-		// Initialize paths
+		// Initialize paths with proper visibility
 		this.paths.forEach((path) => {
 			const length = path.getTotalLength();
 			path.setAttribute("data-length", length);
-			path.style.strokeDasharray = length;
+			path.setAttribute("data-progress", "0");
+
+			// Set constant opacity immediately - no transitions
+			path.style.opacity = "0.7";
+			path.style.transition = "none";
+
+			// Set up visual properties
+			const type = this.getPathType(path);
+			const visibleLength = this.getVisibleLength(type, length);
+			path.style.strokeDasharray = `${visibleLength}, ${length}`;
 			path.style.strokeDashoffset = length;
 			path.style.setProperty("--path-length", length);
 		});
 
 		// Rest of initialization
 		this.setupVisibilityObserver();
+	}
+
+	// Helper method to get path type
+	getPathType(path) {
+		if (path.classList.contains("loop")) return "loop";
+		if (path.classList.contains("doubleLoop")) return "doubleLoop";
+		return "simple";
+	}
+
+	// Helper method to calculate visible length
+	getVisibleLength(type, length) {
+		if (type === "loop") return length * 0.25; // Reduced from 0.35
+		if (type === "doubleLoop") return length * 0.3; // Reduced from 0.4
+		return length * 0.2;
+	}
+
+	// Add new method for interpolated visible length
+	getInterpolatedVisibleLength(type, length, progress) {
+		// Target lengths (unchanged from current values)
+		const targetLength =
+			type === "loop" ? 0.25 : type === "doubleLoop" ? 0.3 : 0.2;
+		// Start with 0.1 and interpolate to target length
+		const startLength = 0.1;
+		// Use easeInOutCubic for smooth interpolation during first 30% of animation
+		const interpolationProgress = Math.min(1, progress / 0.3);
+		const t = this.easeInOutCubic(interpolationProgress);
+		return length * (startLength + (targetLength - startLength) * t);
 	}
 
 	setupVisibilityObserver() {
@@ -248,12 +346,66 @@ class WindAnimation {
 	}
 
 	resetPaths() {
+		this.pendingRegeneration.clear();
+		this.newPaths.clear();
+
+		// Reset all paths to be off-screen initially
 		this.paths.forEach((path) => {
 			const length = parseFloat(path.getAttribute("data-length"));
-			path.style.strokeDasharray = length;
-			path.style.strokeDashoffset = length;
-			path.style.opacity = "0";
+			path.setAttribute("data-progress", "0");
+			path.setAttribute("data-status", "reset");
+
+			// Clear transitions
+			path.style.transition = "none";
+			path.style.opacity = "0.7";
+
+			const type = this.getPathType(path);
+			const visibleLength = length * 0.1; // Start with minimum visible length
+
+			// Set up for off-screen starting position
+			path.style.strokeDasharray = `${visibleLength}, ${length}`;
+			path.style.strokeDashoffset = length + visibleLength;
 		});
+	}
+
+	regeneratePath(index) {
+		const baseY = 150 + index * 120;
+
+		// Random type selection
+		const pathTypes = ["simple", "loop", "doubleLoop"];
+		const typeIndex = Math.floor(Math.random() * 3);
+		const type = pathTypes[typeIndex];
+
+		const newPath = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"path"
+		);
+		newPath.setAttribute("class", `wind-path ${type === "simple" ? "" : type}`);
+		newPath.setAttribute(
+			"d",
+			this.pathGenerator.generateRandomPath(baseY, type)
+		);
+
+		// Initialize with proper start position
+		const length = newPath.getTotalLength();
+		newPath.setAttribute("data-length", length);
+		newPath.setAttribute("data-progress", "0");
+		newPath.setAttribute("data-status", "new");
+
+		// Set up visual properties to ensure path starts completely offscreen
+		const visibleLength = length * 0.1; // Start with minimum visible length
+
+		// The key change: Set dasharray and offset to ensure no visible part at start
+		newPath.style.strokeDasharray = `${visibleLength}, ${length}`;
+
+		// Start with offset = length + visibleLength to ensure complete invisibility
+		newPath.style.strokeDashoffset = length + visibleLength;
+
+		newPath.style.setProperty("--path-length", length);
+		newPath.style.opacity = "0.7";
+		newPath.style.transition = "none";
+
+		return newPath;
 	}
 
 	animate(timestamp) {
@@ -262,76 +414,56 @@ class WindAnimation {
 		const deltaTime = (timestamp - this.lastTimestamp) / 1000;
 		this.lastTimestamp = timestamp;
 
-		// Increase speed significantly
-		this.progress += deltaTime * 0.8; // Much faster progression
-
-		this.paths.forEach((path, index) => {
-			const pathLength = parseFloat(path.getAttribute("data-length"));
-
-			// Calculate faster progress with shorter visible segments
-			let speed, visibleLength;
-
-			if (path.classList.contains("ribbon")) {
-				speed = 0.4;
-				visibleLength = pathLength * 0.3; // Show only 15% of ribbon
-			} else if (path.classList.contains("looping")) {
-				speed = 0.35;
-				visibleLength = pathLength * 0.35; // Show only 20% of looping path
-			} else if (path.classList.contains("complex-loop")) {
-				speed = 0.3;
-				visibleLength = pathLength * 0.4; // Show only 25% of complex path
-			} else {
-				speed = 0.45;
-				visibleLength = pathLength * 0.2; // Show only 12% of regular path
+		// Handle regenerations first
+		for (const [path, timeToRegenerate] of this.pendingRegeneration.entries()) {
+			if (timestamp >= timeToRegenerate) {
+				const index = Array.from(this.paths).indexOf(path);
+				if (index !== -1) {
+					const newPath = this.regeneratePath(index);
+					this.svg.insertBefore(newPath, path);
+					path.remove();
+					this.paths[index] = newPath;
+				}
+				this.pendingRegeneration.delete(path);
 			}
+		}
 
-			// Calculate offset based on speed and stagger
-			const offset =
-				(this.progress * speed * pathLength + index * 300) % (pathLength * 1.2);
+		// Process active paths
+		this.paths.forEach((path, index) => {
+			if (this.pendingRegeneration.has(path)) return;
 
-			// Set dasharray to create small visible segments
-			path.style.strokeDasharray = `${visibleLength}, ${pathLength}`;
-			path.style.strokeDashoffset = offset;
+			const pathLength = parseFloat(path.getAttribute("data-length"));
+			const type = this.getPathType(path);
+			let pathProgress = parseFloat(path.getAttribute("data-progress") || "0");
 
-			// Set opacity based on path type
-			path.style.opacity = path.classList.contains("ribbon") ? "0.4" : "0.7";
+			if (pathProgress < 1) {
+				let speed = type === "loop" ? 0.35 : type === "doubleLoop" ? 0.3 : 0.45;
+				pathProgress = Math.min(1, pathProgress + deltaTime * speed * 0.8);
+				path.setAttribute("data-progress", pathProgress.toString());
+
+				const visibleLength = this.getInterpolatedVisibleLength(
+					type,
+					pathLength,
+					pathProgress
+				);
+				const initialOffset = pathLength + visibleLength;
+				const travelDistance = pathProgress * pathLength;
+				const currentOffset = initialOffset - travelDistance;
+
+				path.style.strokeDasharray = `${visibleLength}, ${pathLength}`;
+				path.style.strokeDashoffset = currentOffset;
+
+				if (pathProgress === 1 && !this.pendingRegeneration.has(path)) {
+					path.setAttribute("data-status", "completed");
+					this.pendingRegeneration.set(
+						path,
+						timestamp + this.regenerationDelay
+					);
+				}
+			}
 		});
 
 		requestAnimationFrame(this.animate);
-	}
-
-	animatePathProgress(path, progress, pathLength, cycleLength) {
-		// Calculate normalized progress within the cycle
-		const normalizedProgress = progress / cycleLength;
-
-		// Enhanced animation phases with improved transitions
-		if (normalizedProgress < 0.05) {
-			// Smoother fade in
-			path.style.opacity = this.easeInQuad(normalizedProgress * 20);
-			path.style.strokeDashoffset = pathLength;
-		} else if (normalizedProgress < 0.45) {
-			// Drawing phase with better easing
-			const drawProgress = this.easeInOutCubic(
-				(normalizedProgress - 0.05) / 0.4
-			);
-			path.style.strokeDashoffset = pathLength - pathLength * drawProgress;
-			path.style.opacity = Math.min(1, 0.7 + drawProgress * 0.3);
-		} else if (normalizedProgress < 0.55) {
-			// Hold phase
-			path.style.strokeDashoffset = 0;
-			path.style.opacity = 1;
-		} else if (normalizedProgress < 0.95) {
-			// Smoother erasing phase
-			const eraseProgress = this.easeInOutCubic(
-				(normalizedProgress - 0.55) / 0.4
-			);
-			path.style.strokeDashoffset = -pathLength * eraseProgress;
-			path.style.opacity = Math.max(0, 1 - eraseProgress * 0.9);
-		} else {
-			// Reset phase with zero opacity
-			path.style.opacity = 0;
-			path.style.strokeDashoffset = pathLength;
-		}
 	}
 
 	// Enhanced easing functions for smoother transitions
@@ -348,7 +480,11 @@ class WindAnimation {
 	}
 }
 
-// Initialize when DOM is loaded
+// Initialize when DOM is loaded with a delay
 document.addEventListener("DOMContentLoaded", () => {
-	window.windAnimation = new WindAnimation();
+	setTimeout(() => {
+		window.windAnimation = new WindAnimation({
+			pathCount: 6,
+		});
+	}, 1000);
 });
