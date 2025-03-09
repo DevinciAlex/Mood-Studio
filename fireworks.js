@@ -7,8 +7,8 @@ let fireworkRockets = [];
 let fireworkTrails = [];
 let lastRocketTime = 0;
 let lastGoldenLaunchTime = 0;
-const rocketFrequency = 777; // ms between rockets
-const goldenLauncherFrequency = 777; // ms between golden launcher shots
+const rocketFrequency = 300; // ms between rockets
+const goldenLauncherFrequency = 300; // ms between golden launcher shots
 
 // FPS counter variables
 let frameCount = 0;
@@ -565,7 +565,7 @@ function createCascadeExplosion(rocket) {
 			vy: Math.sin(angle) * speed,
 			color: color,
 			size: 2 + Math.random() * 1.5,
-			life: 0.9 + Math.random() * 0.3,
+			life: 0.6 + Math.random() * 0.3,
 			decay: 0.004, // Reduced decay for longer visibility (was 0.006)
 			gravity: 0.015, // Will be doubled in update
 			sparkle: Math.random() > 0.5,
@@ -610,7 +610,7 @@ function createSecondaryExplosion(particle) {
 		vx: 0,
 		vy: 0,
 		color: "#FFFFFF",
-		size: 5,
+		size: 10,
 		life: 0.8, // Increased from 0.7
 		decay: 0.08, // Reduced from 0.1
 		glow: true,
