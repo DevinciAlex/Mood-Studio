@@ -67,6 +67,26 @@ body {
 	background: #6a1b9a;
 }
 
+.anger-active {
+	background-color: #300;
+	transition: background-color 0.8s ease;
+}
+
+.anger-cooldown {
+	background-color: #000;
+	transition: background-color 1.5s ease;
+}
+
+/* Ensure canvas is only visible in anger section */
+#fist {
+	opacity: 0;
+	transition: opacity 0.8s ease;
+}
+
+.anger-active #fist {
+	opacity: 1;
+}
+
 .light-circle {
 	position: absolute;
 	border-radius: 50%;

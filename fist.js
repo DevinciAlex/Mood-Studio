@@ -926,6 +926,8 @@ let resetInProgress = false;
 
 // Main animation loop
 function animate() {
+	if (!window.angerEffects?.isActive) return;
+
 	// Update rage level and handle max rage state
 	if (!resetInProgress) {
 		rageLevel = Math.min(MAX_RAGE, rageLevel + RAGE_INCREASE_RATE);
@@ -1229,22 +1231,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	// More frequent but smaller batches for smoother creation
 	setInterval(() => {
-		if (fists.length < 15 && Math.random() > 0.4 && isDocumentActive) {
+		if (
+			window.angerEffects?.isActive &&
+			fists.length < 15 &&
+			Math.random() > 0.4 &&
+			isDocumentActive
+		) {
 			createRandomFist();
 		}
 	}, 150); // Slightly slower creation rate to better see explosions
 
 	// Add keyboard shortcut to trigger rage pulse (for testing)
 	document.addEventListener("keydown", (e) => {
+		if (!window.angerEffects?.isActive) return;
+
 		if (e.key === "r" || e.key === "R") {
 			rageLevel = Math.min(MAX_RAGE, rageLevel + 10);
 			angryPulse.start();
-		}
-	});
-
-	// Add keyboard shortcut for testing the glass break
-	document.addEventListener("keydown", (e) => {
-		if (e.key === "b" || e.key === "B") {
+		} else if (e.key === "b" || e.key === "B") {
 			glassBreak.activate();
 			resetInProgress = true;
 			createMassiveExplosion();
