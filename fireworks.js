@@ -167,7 +167,7 @@ function createFireworkRocket() {
 		targetY: 100 + Math.random() * (fireworksCanvas.height * 0.7),
 		speed: 2 + Math.random() * 4,
 		wobble: {
-			amplitude: Math.random() * 1.5,
+			amplitude: Math.random() * 1.5 - 0.75,
 			frequency: 0.1 + Math.random() * 0.1,
 			offset: 0,
 		},
@@ -271,12 +271,7 @@ function updateFireworksAnimation() {
 
 		// Apply gravity if specified - doubled as requested
 		if (particle.gravity) {
-			// For heart particles, reduce gravity effect to maintain the shape
-			if (particle.heartParticle) {
-				particle.vy += particle.gravity * 2.5; // Special gravity for heart particles
-			} else {
-				particle.vy += particle.gravity * 3;
-			}
+			particle.vy += particle.gravity * 3;
 		}
 
 		// Add some wind effect

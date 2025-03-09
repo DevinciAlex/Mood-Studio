@@ -180,7 +180,7 @@ class LeafAnimation {
             `;
 
 			// Reset leaf if it goes off right edge of screen
-			if (leaf.x > viewportWidth + 250) {
+			if (leaf.x > viewportWidth + 400) {
 				leaf.resetting = true;
 
 				// Use setTimeout to avoid visual glitches during reset
