@@ -10,7 +10,9 @@
     <link rel="stylesheet" href="glass-shatter.css">
     <link rel="stylesheet" href="loader.css">
     <link rel="stylesheet" href="wind-animations.css">
+    <link rel="stylesheet" href="calm-leaves.css">
     <link rel="stylesheet" href="rain.css">
+    <link rel="stylesheet" href="fireworks.css">
 </head>
 
 <body>
@@ -33,7 +35,14 @@
                 </div>
             </div>
 
-            <div class="section surprise">Surprise</div>
+            <div class="section surprise">
+                <div class="countdown"></div>
+                <div class="fireworks-container">
+                    <canvas id="fireworks-canvas"></canvas>
+                </div>
+                <div class="surprise-title">SURPRISE!</div>
+            </div>
+
             <div class="section anger">
                 <div class="rage-title">Unleash Your Rage</div>
                 <canvas id="fist"></canvas>
@@ -41,10 +50,10 @@
             <div class="section sadness">
                 <div class="night-sky"></div>
                 <div class="clouds"></div>
-                
+
                 <div class="rain-container" id="rain-container"></div>
                 <div class="elipse-container" id="elipse-container"></div>
-                
+
                 <div class="puddle"></div>
                 <img src="umbrella.jpg" class="man" alt="Homme sous la pluie">
                 <div class="shadow"></div>
@@ -67,7 +76,9 @@
     <script src="fist.js"></script>
     <script src="anger-effects.js"></script>
     <script src="wind-paths.js"></script>
+    <script src="calm-leaves.js"></script>
     <script src="rain.js"></script>
+    <script src="fireworks.js"></script>
 </body>
 
 </html>

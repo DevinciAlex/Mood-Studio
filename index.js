@@ -20,6 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	updateSectionEffects(0);
 });
 
+// Create a custom event for section changes
+function triggerSectionChangedEvent(index) {
+	const event = new CustomEvent("sectionChanged", {
+		detail: { index: index },
+	});
+	document.dispatchEvent(event);
+}
+
 function scrollToSection(index) {
 	if (isScrolling) return;
 
@@ -30,6 +38,9 @@ function scrollToSection(index) {
 	currentSection = index;
 	updateActiveButton(index);
 	updateSectionEffects(index);
+
+	// Dispatch the section changed event
+	triggerSectionChangedEvent(index);
 
 	setTimeout(() => (isScrolling = false), 1600);
 }
