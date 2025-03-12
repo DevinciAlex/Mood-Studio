@@ -55,6 +55,7 @@ function resizeFireworksCanvas() {
 }
 
 function resetSurpriseSection() {
+	animateFireworks();
 	const countdownElement = document.querySelector(".countdown");
 	countdownElement.classList.remove("active");
 	countdownElement.textContent = "";
@@ -101,6 +102,7 @@ function startFireworks() {
 	rocketFrequency = baseRocketFrequency; // Start with base frequency
 	goldenLauncherFrequency = baseGoldenLauncherFrequency;
 	particleDensity = 1.0; // Start with full density
+
 	animateFireworks();
 }
 
@@ -700,7 +702,7 @@ function createCircleExplosion(rocket) {
 		const speed = 1.5 + Math.random() * 2;
 		const color = colors[i % colors.length];
 
-		fireworkParticles.push({
+		let particle = {
 			x: rocket.x,
 			y: rocket.y,
 			vx: Math.cos(angle) * speed,
@@ -709,11 +711,16 @@ function createCircleExplosion(rocket) {
 			size: 1.5 + Math.random() * 1.5,
 			life: 0.8 + Math.random() * 0.4,
 			decay: 0.01 + Math.random() * 0.005,
-			gravity: 0.02, // Gravity now doubled in update function
+			gravity: 0.02,
 			sparkle: Math.random() > 0.7,
 			sparkleColor: color,
 			glow: Math.random() > 0.5,
-		});
+		};
+
+		// Normalize the particle properties
+		particle = normalizeParticleProperties(particle);
+
+		fireworkParticles.push(particle);
 	}
 }
 
@@ -954,7 +961,7 @@ function createChrysanthemumExplosion(rocket) {
 			const speed = 1.0 + particleDistance * 0.8;
 
 			// Create the main petal particle
-			fireworkParticles.push({
+			let particle = {
 				x: rocket.x,
 				y: rocket.y,
 				vx: Math.cos(particleAngle) * speed,
@@ -966,16 +973,21 @@ function createChrysanthemumExplosion(rocket) {
 				gravity: 0.01,
 				sparkle: Math.random() > 0.7,
 				glow: true,
-			});
+			};
+
+			// Normalize particle properties
+			particle = normalizeParticleProperties(particle);
+
+			fireworkParticles.push(particle);
 		}
 	}
 
-	// Add center particles
+	// Add center particles with normalized properties
 	for (let i = 0; i < 30; i++) {
 		const angle = Math.random() * Math.PI * 2;
 		const speed = 0.5 + Math.random() * 0.8; // Slower speed for center particles
 
-		fireworkParticles.push({
+		let particle = {
 			x: rocket.x,
 			y: rocket.y,
 			vx: Math.cos(angle) * speed,
@@ -987,7 +999,12 @@ function createChrysanthemumExplosion(rocket) {
 			gravity: 0.008,
 			glow: true,
 			sparkle: Math.random() > 0.5,
-		});
+		};
+
+		// Normalize particle properties
+		particle = normalizeParticleProperties(particle);
+
+		fireworkParticles.push(particle);
 	}
 
 	// Add stamens (center spikes) to enhance flower look
@@ -1209,6 +1226,26 @@ document.addEventListener("keydown", (e) => {
 		);
 	}
 });
+
+// Add a new function to normalize particle properties
+function normalizeParticleProperties(particle) {
+	// Normalize gravity to a standard value
+	const standardGravity = 0.03;
+	particle.gravity = standardGravity;
+
+	// Optimize particle lifespan
+	if (particle.life > 1.5) {
+		// Reduce lifespan of long-living particles
+		particle.life = 1.5;
+		particle.decay *= 1.2; // Increase decay rate
+	} else if (particle.life < 0.5) {
+		// Increase lifespan of short-lived particles
+		particle.life = 0.5;
+		particle.decay *= 0.8; // Decrease decay rate
+	}
+
+	return particle;
+}
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", initSurpriseSection);
