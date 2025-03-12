@@ -256,3 +256,9 @@ body {
 	color: white;
 	font-weight: bold;
 }
+#tombeCanvas {
+	position: absolute; 
+	top: 20%; 
+	left: 25%; 
+	height: 50%; 
+}

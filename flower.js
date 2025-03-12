@@ -243,7 +243,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => {
         createFlowers();
     });
-    
-    
-    document.head.appendChild(style);
 });
