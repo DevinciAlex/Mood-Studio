@@ -36,6 +36,15 @@ body {
 		/* Bleu ciel plus doux */ #e0f2f7 100% /* Blanc bleuté vers l'horizon */
 	);
 }
+.grass {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 35%;
+	background: linear-gradient(to top, #4a9e2c, #7bce56);
+	border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+	transform: scaleX(1.5);
+}
 .calm {
 	background: linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%);
 	position: relative;
