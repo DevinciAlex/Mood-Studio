@@ -13,13 +13,56 @@
     <link rel="stylesheet" href="calm-leaves.css">
     <link rel="stylesheet" href="rain.css">
     <link rel="stylesheet" href="fireworks.css">
+    <link rel="stylesheet" href="intro.css">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+    </style>
 </head>
 
 <body>
     <div id="loader-wrapper">
-        <div class="loader">
-            <div class="loader-circle"></div>
-            <div class="loader-title">Mood Studio</div>
+        <div class="loader-scene">
+            <div class="cube">
+                <div class="cube-face front">Mood</div>
+                <div class="cube-face back">Express</div>
+                <div class="cube-face top">Feel</div>
+                <div class="cube-face bottom">Studio</div>
+                <div class="cube-face left">Explore</div>
+                <div class="cube-face right">Experience</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="intro-overlay" class="hidden">
+        <div class="intro-content">
+            <h1>Welcome to The Mood Studio</h1>
+            <p>An interactive experience exploring different emotions through visual and interactive elements.</p>
+
+            <div class="intro-instructions">
+                <h2>How to Navigate:</h2>
+                <ul>
+                    <li>Use the navigation dots or arrow keys to move between emotions</li>
+                    <li>Interact with each scene to experience unique effects</li>
+                    <li>Fully immerse yourself in each emotional landscape</li>
+                </ul>
+            </div>
+
+            <div class="emotion-preview">
+                <div class="preview-item" data-emotion="joy">Joy</div>
+                <div class="preview-item" data-emotion="calm">Calm</div>
+                <div class="preview-item" data-emotion="surprise">Surprise</div>
+                <div class="preview-item" data-emotion="anger">Anger</div>
+                <div class="preview-item" data-emotion="sadness">Sadness</div>
+            </div>
+
+            <button id="start-experience" class="pulse-button">Begin Experience</button>
         </div>
     </div>
 
@@ -40,7 +83,6 @@
                 <div class="fireworks-container">
                     <canvas id="fireworks-canvas"></canvas>
                 </div>
-                <div class="surprise-title">SURPRISE!</div>
             </div>
 
             <div class="section anger">
@@ -58,16 +100,30 @@
                 <img src="umbrella.jpg" class="man" alt="Homme sous la pluie">
                 <div class="shadow"></div>
             </div>
-            <div class="section fear">Peur</div>
         </div>
 
-        <div class="nav-buttons">
-            <button onclick="scrollToSection(0)">Joie</button>
-            <button onclick="scrollToSection(1)">Calme</button>
-            <button onclick="scrollToSection(2)">Surprise</button>
-            <button onclick="scrollToSection(3)">colère</button>
-            <button onclick="scrollToSection(4)">Tristesse</button>
-            <button onclick="scrollToSection(5)">Peur</button>
+        <div class="section-indicator">
+            <div class="indicator-dots">
+                <span class="dot active" data-section="0"></span>
+                <span class="dot" data-section="1"></span>
+                <span class="dot" data-section="2"></span>
+                <span class="dot" data-section="3"></span>
+                <span class="dot" data-section="4"></span>
+            </div>
+            <div class="current-section-name">Joy</div>
+        </div>
+
+        <div class="navigation-controls">
+            <button class="nav-arrow prev" id="prev-section">
+                <svg class="arrow-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor" />
+                </svg>
+            </button>
+            <button class="nav-arrow next" id="next-section">
+                <svg class="arrow-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor" />
+                </svg>
+            </button>
         </div>
     </main>
 

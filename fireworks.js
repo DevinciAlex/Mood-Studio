@@ -7,8 +7,8 @@ let fireworkRockets = [];
 let fireworkTrails = [];
 let lastRocketTime = 0;
 let lastGoldenLaunchTime = 0;
-const baseRocketFrequency = 500; // Base ms between rockets
-const baseGoldenLauncherFrequency = 500; // Base ms between golden launcher shots
+const baseRocketFrequency = 777; // Base ms between rockets
+const baseGoldenLauncherFrequency = 777; // Base ms between golden launcher shots
 let rocketFrequency = baseRocketFrequency; // Dynamic frequency
 let goldenLauncherFrequency = baseGoldenLauncherFrequency; // Dynamic frequency
 
@@ -60,9 +60,6 @@ function resetSurpriseSection() {
 	countdownElement.classList.remove("active");
 	countdownElement.textContent = "";
 
-	const surpriseTitle = document.querySelector(".surprise-title");
-	surpriseTitle.classList.remove("visible");
-
 	fireworkParticles = [];
 	fireworkRockets = [];
 	fireworkTrails = [];
@@ -83,12 +80,6 @@ function startFireworksCountdown() {
 		if (count < 0) {
 			clearInterval(countInterval);
 			startFireworks();
-
-			// Show the surprise title
-			setTimeout(() => {
-				const surpriseTitle = document.querySelector(".surprise-title");
-				surpriseTitle.classList.add("visible");
-			}, 1000);
 		}
 	}, 1000);
 }
@@ -1076,7 +1067,7 @@ function createCrossetteExplosion(rocket) {
 				vy: 0,
 				color: "#FFFFFF",
 				size: 3, // Slightly smaller flash
-				life: 1, // Shorter life
+				life: 0.3, // Shorter life
 				decay: 0.012, // Faster decay
 				glow: true,
 			});

@@ -1,0 +1,489 @@
+#intro-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.85);
+	backdrop-filter: blur(10px);
+	z-index: 9000;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	opacity: 0; /* Start invisible by default */
+	transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+#intro-overlay.hidden {
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.8s cubic-bezier(0.33, 1, 0.68, 1), visibility 0s 0.8s; /* Improved timing */
+}
+
+/* Enhanced fade-in transition with two-step animation */
+#intro-overlay.fade-in {
+	animation: fadeInIntro 1.4s ease-out forwards;
+}
+
+/* Two-phase intro animation: first from black, then content appears */
+@keyframes fadeInIntro {
+	0% {
+		opacity: 0;
+		backdrop-filter: blur(0);
+		background: rgb(0, 0, 0); /* Pure black */
+	}
+	40% {
+		opacity: 1;
+		backdrop-filter: blur(0);
+		background: rgb(0, 0, 0); /* Hold at pure black for a moment */
+	}
+	100% {
+		opacity: 1;
+		backdrop-filter: blur(10px);
+		background: rgba(0, 0, 0, 0.85); /* Fade to final semi-transparent state */
+	}
+}
+
+/* Extra animation for the intro content itself */
+.intro-content {
+	max-width: 800px;
+	padding: 40px;
+	color: white;
+	text-align: center;
+	background: rgba(30, 30, 30, 0.7);
+	border-radius: 20px;
+	box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+	position: relative; /* Keep this for proper overlay positioning */
+	opacity: 0; /* Start invisible */
+	transform: none; /* Remove the initial transform to prevent movement */
+	transition: opacity 1s ease-out;
+	will-change: opacity; /* Performance optimization */
+}
+
+.intro-content.visible {
+	opacity: 1;
+	/* No animation to reduce CPU usage */
+}
+
+/* Create a separate class for floating if needed later */
+.intro-content.floating {
+	animation: float 4s infinite ease-in-out;
+}
+
+/* Improved content fade overlay - black overlay for content transition */
+.content-fade-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #000000; /* Solid black */
+	z-index: 10;
+	opacity: 1;
+	transition: opacity 1.2s ease-out; /* Smoother easing */
+	pointer-events: none;
+	border-radius: 20px;
+	will-change: opacity; /* Performance optimization */
+}
+
+.content-fade-overlay.fading {
+	opacity: 0;
+}
+
+/* New animation for content appearing after the background fade */
+@keyframes contentAppear {
+	0% {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Replace the existing float animation to work with contentAppear */
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+.intro-content h1 {
+	font-size: 3.2em;
+	margin-bottom: 25px;
+	letter-spacing: 2px;
+	font-weight: bold;
+	text-transform: uppercase;
+	background: linear-gradient(
+		90deg,
+		#ff3366,
+		#ff6b6b,
+		#ffb347,
+		#ffdd6f,
+		#66ccff,
+		#ff3366
+	);
+	background-size: 400% 100%;
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	animation: gradientMove 8s linear infinite;
+	text-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes gradientMove {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+.intro-content p {
+	font-size: 1.2em;
+	line-height: 1.6;
+	margin-bottom: 30px;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.intro-instructions {
+	background: rgba(0, 0, 0, 0.3);
+	padding: 20px;
+	border-radius: 10px;
+	margin-bottom: 30px;
+	text-align: left;
+}
+
+.intro-instructions h2 {
+	margin-top: 0;
+	color: #66ccff;
+	font-size: 1.3em;
+}
+
+.intro-instructions ul {
+	padding-left: 20px;
+}
+
+.intro-instructions li {
+	margin: 10px 0;
+	color: rgba(255, 255, 255, 0.8);
+}
+
+.emotion-preview {
+	display: flex;
+	justify-content: space-between;
+	margin: 30px 0;
+}
+
+.preview-item {
+	padding: 10px 15px;
+	border-radius: 20px;
+	cursor: pointer;
+	transition: all 0.3s;
+	font-weight: bold;
+}
+
+.preview-item:hover {
+	transform: scale(1.1);
+	box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+.preview-item[data-emotion="joy"] {
+	background-color: rgba(255, 204, 0, 0.7);
+}
+.preview-item[data-emotion="calm"] {
+	background-color: rgba(102, 204, 255, 0.7);
+}
+.preview-item[data-emotion="surprise"] {
+	background-color: rgba(255, 102, 255, 0.7);
+}
+.preview-item[data-emotion="anger"] {
+	background-color: rgba(255, 51, 51, 0.7);
+}
+.preview-item[data-emotion="sadness"] {
+	background-color: rgba(51, 102, 153, 0.7);
+}
+.preview-item[data-emotion="fear"] {
+	background-color: rgba(51, 51, 51, 0.7);
+}
+
+#start-experience {
+	background: linear-gradient(45deg, #ff3366, #ff6b6b);
+	border: none;
+	padding: 15px 40px;
+	font-size: 1.2em;
+	color: white;
+	border-radius: 30px;
+	cursor: pointer;
+	transition: all 0.3s;
+	margin-top: 20px;
+	font-weight: bold;
+	box-shadow: 0 5px 15px rgba(255, 51, 102, 0.4);
+	transform: translateZ(0); /* Promote to GPU layer */
+}
+
+#start-experience:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 8px 20px rgba(255, 51, 102, 0.6);
+}
+
+.pulse-button {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.7);
+	}
+	70% {
+		box-shadow: 0 0 0 15px rgba(255, 51, 102, 0); /* Transparent end state */
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); /* Transparent end state */
+	}
+}
+
+/* New navigation indicators */
+.section-indicator {
+	position: fixed;
+	bottom: 30px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.indicator-dots {
+	display: flex;
+	gap: 10px;
+	background: rgba(0, 0, 0, 0.4);
+	padding: 10px 20px;
+	border-radius: 30px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.3);
+	cursor: pointer;
+	transition: all 0.3s;
+	transform: translateZ(0); /* Promote to GPU layer */
+}
+
+.dot.active {
+	background: rgba(255, 255, 255, 0.95);
+	transform: scale(1.3);
+	box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+}
+
+.current-section-name {
+	color: white;
+	font-size: 1.2em;
+	margin-top: 10px;
+	font-weight: bold;
+	text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	transition: opacity 0.3s ease;
+}
+
+.current-section-name.pulse {
+	animation: namePulse 0.6s ease-in-out;
+}
+
+@keyframes namePulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+}
+
+.navigation-controls {
+	position: fixed;
+	top: 50%;
+	width: 100%;
+	z-index: 1000;
+	display: flex;
+	justify-content: space-between;
+	padding: 0 25px;
+	pointer-events: none;
+	transform: translateY(-50%);
+}
+
+.nav-arrow {
+	background: rgba(15, 15, 15, 0.8);
+	border: 2px solid rgba(255, 255, 255, 0.2);
+	width: 65px;
+	height: 65px;
+	border-radius: 50%;
+	color: white;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+		opacity 0.5s ease, background-color 0.5s ease;
+	pointer-events: auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	backdrop-filter: blur(10px);
+	box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5),
+		inset 0 0 15px rgba(255, 255, 255, 0.05);
+	transform: translateZ(0); /* Promote to GPU layer */
+}
+
+.nav-arrow:hover {
+	background: rgba(25, 25, 25, 0.9);
+	transform: scale(1.1);
+	border-color: rgba(255, 255, 255, 0.5);
+	box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.2),
+		inset 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.nav-arrow:active {
+	transform: scale(0.95);
+}
+
+.nav-arrow.disabled {
+	opacity: 0.25;
+	cursor: default;
+	background: rgba(10, 10, 10, 0.5);
+	border-color: rgba(100, 100, 100, 0.2);
+	transform: scale(0.95);
+	box-shadow: none;
+}
+
+.nav-arrow.disabled:hover {
+	transform: scale(0.95);
+	background: rgba(10, 10, 10, 0.5);
+	border-color: rgba(100, 100, 100, 0.2);
+	box-shadow: none;
+}
+
+.nav-arrow-icon {
+	display: inline-block;
+	font-weight: 300;
+	text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+}
+
+.arrow-svg {
+	width: 30px;
+	height: 30px;
+	filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+}
+
+/* For mobile */
+@media (max-width: 768px) {
+	.intro-content {
+		padding: 20px;
+		width: 90%;
+	}
+
+	.emotion-preview {
+		flex-wrap: wrap;
+		gap: 10px;
+		justify-content: center;
+	}
+
+	.preview-item {
+		margin: 5px;
+	}
+}
+
+/* Add global scroll prevention */
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background-color: #000000;
+}
+
+/* Section transition overlay */
+#section-transition-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw; /* Full viewport width */
+	height: 100vh; /* Full viewport height */
+	background: #000000; /* Pure solid black */
+	z-index: 900;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+	will-change: opacity; /* Hint for browser optimization */
+}
+
+#section-transition-overlay.active {
+	opacity: 1;
+}
+
+/* Section animation states */
+.section {
+	opacity: 0.7;
+	transition: opacity 0.8s ease;
+}
+
+.section.animation-ready {
+	opacity: 1;
+}
+
+/* Specific section animation delays */
+.section.joy.animation-ready .light-circle,
+.section.joy.animation-ready .sun {
+	animation-play-state: running;
+}
+
+.section.calm.animation-ready .wind-container {
+	opacity: 1;
+}
+
+.section.surprise.animation-ready .fireworks-container {
+	opacity: 1;
+}
+
+.section.anger.animation-ready .rage-title,
+.section.anger.animation-ready #fist {
+	animation-play-state: running;
+	opacity: 1;
+}
+
+.section.sadness.animation-ready .rain-container,
+.section.sadness.animation-ready .clouds,
+.section.sadness.animation-ready .elipse-container {
+	opacity: 1;
+}
+
+/* Content fade overlay - additional black overlay for smoother content transition */
+.content-fade-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #000000; /* Solid black */
+	z-index: 10;
+	opacity: 1;
+	transition: opacity 1.2s ease-out; /* Smoother easing */
+	pointer-events: none;
+	border-radius: 20px;
+	will-change: opacity; /* Performance optimization */
+}
+
+.content-fade-overlay.fading {
+	opacity: 0;
+}

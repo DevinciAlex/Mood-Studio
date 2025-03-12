@@ -25,6 +25,8 @@ body {
 	font-size: 3rem;
 	font-weight: bold;
 	color: white;
+	position: relative;
+	overflow: hidden;
 }
 .joy {
 	position: relative;
@@ -246,4 +248,85 @@ body {
 	background: #ff5722;
 	color: white;
 	font-weight: bold;
+}
+
+/* Adding initial animation states for sections */
+
+/* General section styles */
+.section {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
+
+/* Joy section */
+.section.joy .sun,
+.section.joy .light-circle {
+	animation-play-state: paused;
+	transition: all 1s ease;
+}
+
+/* Calm section */
+.section.calm .wind-container {
+	opacity: 0;
+	transition: opacity 1s ease 0.5s;
+}
+
+.section.calm .wind-svg path {
+	transition-delay: 0.8s;
+}
+
+/* Surprise section */
+.section.surprise .fireworks-container {
+	opacity: 0;
+	transition: opacity 1s ease 0.5s;
+}
+
+/* Anger section */
+.section.anger .rage-title,
+.section.anger #fist {
+	opacity: 0;
+	animation-play-state: paused;
+	transition: opacity 0.8s ease 0.5s;
+}
+
+/* Sadness section */
+.section.sadness .rain-container,
+.section.sadness .clouds,
+.section.sadness .elipse-container {
+	opacity: 0;
+	transition: opacity 1.2s ease 0.6s;
+}
+
+.section.sadness .man,
+.section.sadness .puddle,
+.section.sadness .shadow {
+	opacity: 0;
+	transition: opacity 1.5s ease 0.8s;
+}
+
+.section.sadness.animation-ready .man,
+.section.sadness.animation-ready .puddle,
+.section.sadness.animation-ready .shadow {
+	opacity: 1;
+}
+
+/* Sadness section - Fix for rain disappearing */
+.section.sadness.animation-ready .rain-container {
+	opacity: 1 !important;
+	visibility: visible !important;
+	pointer-events: none; /* Allow interaction with elements below */
+	z-index: 5; /* Ensure proper stacking */
+}
+
+.section.sadness.animation-ready .elipse-container {
+	opacity: 1 !important;
+	visibility: visible !important;
+	z-index: 6; /* Above rain container */
+}
+
+/* Prevent transition overlay from hiding rain */
+#section-transition-overlay {
+	pointer-events: none !important; /* Never block interactions */
 }

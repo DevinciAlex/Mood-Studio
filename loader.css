@@ -4,89 +4,251 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background: #000;
+	background: #000000; /* Use pure black instead of dark gray */
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	z-index: 9999;
-	transition: opacity 0.5s, visibility 0.5s;
+	transition: opacity 1.5s ease, visibility 1.5s ease;
+	perspective: 1000px;
+	opacity: 0; /* Start completely invisible */
+	animation: fadeInLoader 1.2s ease-out forwards; /* Initial fade from black */
 }
 
-.loader {
-	text-align: center;
-}
-
-.loader-circle {
-	margin-left: 16px;
-	width: 120px;
-	height: 120px;
-	border: 8px solid transparent;
-	border-top-color: #ff3366;
-	border-radius: 50%;
-	animation: spin 1s linear infinite;
-	position: relative;
-}
-
-.loader-circle::before,
-.loader-circle::after {
-	content: "";
-	position: absolute;
-	top: -8px;
-	left: -8px;
-	right: -8px;
-	bottom: -8px;
-	border: 8px solid transparent;
-	border-radius: 50%;
-}
-
-.loader-circle::before {
-	border-top-color: #66ccff;
-	animation: spin 2s linear infinite;
-}
-
-.loader-circle::after {
-	border-top-color: #ffcc33;
-	animation: spin 3s linear infinite;
-}
-
-.loader-title {
-	color: #fff;
-	font-family: "Arial", sans-serif;
-	font-size: 24px;
-	margin-top: 20px;
-	letter-spacing: 3px;
-	animation: pulse 2s infinite;
-}
-
-@keyframes spin {
+@keyframes fadeInLoader {
 	0% {
-		transform: rotate(0deg);
+		opacity: 0; /* Start completely black */
 	}
 	100% {
-		transform: rotate(360deg);
+		opacity: 1; /* Fully visible */
 	}
 }
 
-@keyframes pulse {
+.loader-scene {
+	width: 200px;
+	height: 200px;
+	perspective: 800px; /* Increased perspective for 3D effect */
+	transform-style: preserve-3d;
+}
+
+/* Optimized cube animation */
+.cube {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	transform-style: preserve-3d;
+	animation: rotate 12s infinite linear; /* Smoother, linear rotation */
+	transform-origin: center center;
+	transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	will-change: transform; /* Performance hint for browser */
+}
+
+.cube-face {
+	position: absolute;
+	width: 200px;
+	height: 200px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-family: "Arial", sans-serif;
+	font-size: 32px;
+	font-weight: bold;
+	color: white;
+	text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); /* Reduced glow */
+	opacity: 0.95;
+	background: rgba(0, 0, 0, 0.3);
+	border: 2px solid rgba(255, 255, 255, 0.5);
+	box-shadow: 0 0 30px rgba(255, 255, 255, 0.3),
+		inset 0 0 20px rgba(255, 255, 255, 0.2);
+	transition: all 0.8s;
+	backdrop-filter: blur(5px);
+}
+
+/* Enhanced colors and glow for each face */
+.front {
+	transform: rotateY(0deg) translateZ(100px);
+	background-color: rgba(255, 51, 102, 0.7);
+	box-shadow: 0 0 40px rgba(255, 51, 102, 0.4);
+	animation: pulseFront 4s infinite alternate;
+}
+.back {
+	transform: rotateY(180deg) translateZ(100px);
+	background-color: rgba(102, 204, 255, 0.7);
+	box-shadow: 0 0 40px rgba(102, 204, 255, 0.4);
+	animation: pulseBack 4s infinite alternate;
+}
+.right {
+	transform: rotateY(90deg) translateZ(100px);
+	background-color: rgba(255, 204, 51, 0.7);
+	box-shadow: 0 0 40px rgba(255, 204, 51, 0.4);
+	animation: pulseRight 4s infinite alternate;
+}
+.left {
+	transform: rotateY(-90deg) translateZ(100px);
+	background-color: rgba(153, 51, 255, 0.7);
+	box-shadow: 0 0 40px rgba(153, 51, 255, 0.4);
+	animation: pulseLeft 4s infinite alternate;
+}
+.top {
+	transform: rotateX(90deg) translateZ(100px);
+	background-color: rgba(51, 204, 51, 0.7);
+	box-shadow: 0 0 40px rgba(51, 204, 51, 0.4);
+	animation: pulseTop 4s infinite alternate;
+}
+.bottom {
+	transform: rotateX(-90deg) translateZ(100px);
+	background-color: rgba(255, 153, 51, 0.7);
+	box-shadow: 0 0 40px rgba(255, 153, 51, 0.4);
+	animation: pulseBottom 4s infinite alternate;
+}
+
+/* Simplified face pulsing animations - reduced effects */
+@keyframes pulseFront {
 	0%,
 	100% {
-		opacity: 0.5;
+		box-shadow: 0 0 20px rgba(255, 51, 102, 0.4);
 	}
 	50% {
-		opacity: 1;
+		box-shadow: 0 0 30px rgba(255, 51, 102, 0.6);
+	}
+}
+
+@keyframes pulseBack {
+	0%,
+	100% {
+		box-shadow: 0 0 30px rgba(102, 204, 255, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 50px rgba(102, 204, 255, 0.7);
+	}
+}
+
+@keyframes pulseRight {
+	0%,
+	100% {
+		box-shadow: 0 0 30px rgba(255, 204, 51, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 50px rgba(255, 204, 51, 0.7);
+	}
+}
+
+@keyframes pulseLeft {
+	0%,
+	100% {
+		box-shadow: 0 0 30px rgba(153, 51, 255, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 50px rgba(153, 51, 255, 0.7);
+	}
+}
+
+@keyframes pulseTop {
+	0%,
+	100% {
+		box-shadow: 0 0 30px rgba(51, 204, 51, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 50px rgba(51, 204, 51, 0.7);
+	}
+}
+
+@keyframes pulseBottom {
+	0%,
+	100% {
+		box-shadow: 0 0 30px rgba(255, 153, 51, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 50px rgba(255, 153, 51, 0.7);
+	}
+}
+
+/* Optimize rotation animation for performance */
+@keyframes rotate {
+	from {
+		transform: rotate3d(1, 1, 1, 0deg);
+	}
+	to {
+		transform: rotate3d(1, 1, 1, 360deg);
 	}
 }
 
 /* When loading is complete */
 .loader-hidden {
-	opacity: 0;
+	opacity: 0 !important;
 	visibility: hidden;
+	transition: opacity 0.8s ease-out, visibility 0s 0.8s !important;
+	background: #000000 !important; /* Force black background during fade */
 }
 
 #main-content {
-	transition: opacity 0.5s;
+	transition: opacity 0.8s;
 }
 
 #main-content.visible {
 	opacity: 1 !important;
+}
+
+/* Simplified loader exit animation */
+@keyframes cubeExit {
+	from {
+		transform: scale(1) rotate3d(1, 1, 1, 0deg);
+		opacity: 1;
+	}
+	to {
+		transform: scale(0) rotate3d(1, 1, 1, 180deg);
+		opacity: 0;
+	}
+}
+
+.cube.exiting {
+	animation: cubeExit 1.5s forwards cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* Optimized fade overlay transition */
+.fade-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw; /* Full viewport width */
+	height: 100vh; /* Full viewport height */
+	background-color: #000000; /* Solid black */
+	opacity: 0;
+	z-index: 9998;
+	pointer-events: none;
+	transition: opacity 0.7s ease-out;
+	will-change: opacity;
+}
+
+.fade-overlay.active {
+	opacity: 1;
+}
+
+/* Intro fade in animation - modified to work with content overlay */
+#intro-overlay {
+	opacity: 0; /* Start invisible */
+	animation: none; /* Remove default animation */
+}
+
+#intro-overlay.fade-in {
+	animation: fadeInIntro 1.2s ease-out forwards; /* Fade in intro content */
+}
+
+@keyframes fadeInIntro {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+/* Remove unused classes */
+.flash-overlay {
+	display: none;
+}
+
+/* Ensure the body has black background during all transitions */
+body {
+	background: #000000 !important;
 }
