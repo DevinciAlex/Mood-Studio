@@ -70,6 +70,7 @@
         <div class="container" id="container">
             <div class="section joy">
                 <div class="light-circle sun"></div>
+                <div class="grass"></div>
             </div>
 
             <div class="section calm">
@@ -97,6 +98,7 @@
                 <div class="elipse-container" id="elipse-container"></div>
 
                 <div class="puddle"></div>
+                <canvas id="tombeCanvas" width="400" height="500"></canvas>
                 <img src="umbrella.jpg" class="man" alt="Homme sous la pluie">
                 <div class="shadow"></div>
             </div>
@@ -129,12 +131,32 @@
 
     <script src="index.js"></script>
     <script src="sun.js"></script>
+    <script src="flower.js"></script>
     <script src="fist.js"></script>
     <script src="anger-effects.js"></script>
     <script src="wind-paths.js"></script>
     <script src="calm-leaves.js"></script>
     <script src="rain.js"></script>
     <script src="fireworks.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let tombeCanvas = document.getElementById('tombeCanvas');
+            let ctx = tombeCanvas.getContext('2d');
+
+            // Dessiner la base de la tombe
+            ctx.fillStyle = '#9c9c9c';
+            ctx.fillRect(100, 220, 160, 150);
+            ctx.beginPath();
+            ctx.arc(180, 220, 80, Math.PI, 2 * Math.PI);
+            ctx.fill();
+
+            // Texte "R.I.P."
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 50px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('R.I.P.', 180, 280);
+        });
+    </script>
 </body>
 
 </html>
