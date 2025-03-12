@@ -260,9 +260,9 @@ body {
 }
 #tombeCanvas {
 	position: absolute;
-	top: 20%;
+	top: 30%; /* Changed from 20% to 30% to move it lower */
 	left: 25%;
-	height: 50%;
+	height: 60%; /* Increased from 50% to 60% for better visibility */
 }
 
 /* Adding initial animation states for sections */

@@ -143,18 +143,215 @@
             let tombeCanvas = document.getElementById('tombeCanvas');
             let ctx = tombeCanvas.getContext('2d');
 
-            // Dessiner la base de la tombe
-            ctx.fillStyle = '#9c9c9c';
-            ctx.fillRect(100, 220, 160, 150);
+            // Clear the canvas first
+            ctx.clearRect(0, 0, tombeCanvas.width, tombeCanvas.height);
+
+            // Reposition the tombstone lower on the canvas
+            const baseY = 420; // Base Y position moved down (was 370)
+            const topY = 270; // Top Y position moved down (was 220)
+            const centerX = 180;
+
+            // Draw ground/soil around the base
+            const groundGradient = ctx.createLinearGradient(50, baseY, 50, baseY + 40);
+            groundGradient.addColorStop(0, '#3d3027');
+            groundGradient.addColorStop(1, '#1a1410');
+
+            ctx.fillStyle = groundGradient;
             ctx.beginPath();
-            ctx.arc(180, 220, 80, Math.PI, 2 * Math.PI);
+            ctx.ellipse(centerX, baseY, 130, 30, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Texte "R.I.P."
-            ctx.fillStyle = 'white';
+            // Add grass/weeds around the base
+            ctx.strokeStyle = '#3a5a40';
+            for (let i = 0; i < 25; i++) {
+                const grassX = centerX - 120 + Math.random() * 240;
+                const grassHeight = 10 + Math.random() * 20;
+                const grassWidth = 1 + Math.random() * 3;
+
+                ctx.lineWidth = grassWidth;
+                ctx.beginPath();
+                ctx.moveTo(grassX, baseY);
+
+                // Randomize the curve of each grass blade
+                const controlX = grassX + (-10 + Math.random() * 20);
+                ctx.bezierCurveTo(
+                    controlX, baseY - grassHeight / 2,
+                    controlX, baseY - grassHeight / 2,
+                    grassX + (-5 + Math.random() * 10), baseY - grassHeight
+                );
+                ctx.stroke();
+            }
+
+            // Tombstone base shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, baseY + 5, 100, 25, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Stone texture gradient - more weathered appearance
+            const stoneGradient = ctx.createLinearGradient(100, topY, 260, baseY);
+            stoneGradient.addColorStop(0, '#8a8a8a');
+            stoneGradient.addColorStop(0.3, '#9c9c9c');
+            stoneGradient.addColorStop(0.6, '#7a7a7a');
+            stoneGradient.addColorStop(0.8, '#686868');
+            stoneGradient.addColorStop(1, '#5a5a5a');
+
+            // Tombstone base shape
+            ctx.fillStyle = stoneGradient;
+            ctx.beginPath();
+            ctx.moveTo(100, baseY);
+            ctx.lineTo(100, topY);
+            ctx.bezierCurveTo(100, topY - 80, 260, topY - 80, 260, topY);
+            ctx.lineTo(260, baseY);
+            ctx.fill();
+
+            // Add stone texture using noise - enhanced with more variation
+            ctx.globalAlpha = 0.1;
+            for (let i = 0; i < 8000; i++) {
+                const x = 100 + Math.random() * 160;
+                const y = (topY - 80) + Math.random() * (baseY - (topY - 80));
+                const size = Math.random() * 2;
+
+                if (x >= 100 && x <= 260 && y >= topY) {
+                    // More varied texture coloration
+                    ctx.fillStyle = Math.random() > 0.6 ?
+                        (Math.random() > 0.5 ? '#ffffff' : '#d0d0d0') :
+                        (Math.random() > 0.5 ? '#555555' : '#333333');
+                    ctx.fillRect(x, y, size, size);
+                }
+                else if (y >= topY - 80 && y <= topY) {
+                    const radius = 80;
+                    if (Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - topY, 2)) <= radius) {
+                        ctx.fillStyle = Math.random() > 0.6 ?
+                            (Math.random() > 0.5 ? '#ffffff' : '#d0d0d0') :
+                            (Math.random() > 0.5 ? '#555555' : '#333333');
+                        ctx.fillRect(x, y, size, size);
+                    }
+                }
+            }
+
+            // Add moss/lichen patches
+            ctx.globalAlpha = 0.15;
+            for (let i = 0; i < 300; i++) {
+                const patchX = 100 + Math.random() * 160;
+                const patchY = topY - 40 + Math.random() * (baseY - topY + 40);
+                const radius = 1 + Math.random() * 8;
+
+                // Moss colors
+                const mossColors = ['#4a6741', '#39512e', '#2c3f22', '#5b7b50'];
+                ctx.fillStyle = mossColors[Math.floor(Math.random() * mossColors.length)];
+
+                ctx.beginPath();
+                ctx.arc(patchX, patchY, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
+
+            // Add more prominent cracks in the stone
+            ctx.strokeStyle = 'rgba(40, 40, 40, 0.7)';
+            ctx.lineWidth = 1.5;
+
+            // Crack 1 - more jagged and longer
+            ctx.beginPath();
+            ctx.moveTo(140, topY - 40);
+            ctx.lineTo(145, topY - 30);
+            ctx.lineTo(140, topY - 10);
+            ctx.bezierCurveTo(150, topY + 30, 170, topY + 50, 170, topY + 80);
+            ctx.stroke();
+
+            // Crack 2
+            ctx.beginPath();
+            ctx.moveTo(230, topY - 20);
+            ctx.bezierCurveTo(210, topY + 50, 220, topY + 90, 200, topY + 120);
+            ctx.stroke();
+
+            // Crack 3 - smaller crack
+            ctx.beginPath();
+            ctx.moveTo(130, topY + 30);
+            ctx.lineTo(150, topY + 60);
+            ctx.stroke();
+
+            // Add water stains
+            ctx.globalAlpha = 0.1;
+            const stainGradient = ctx.createLinearGradient(120, topY - 80, 120, baseY);
+            stainGradient.addColorStop(0, 'rgba(100, 100, 100, 0.1)');
+            stainGradient.addColorStop(0.5, 'rgba(60, 60, 60, 0.2)');
+            stainGradient.addColorStop(1, 'rgba(40, 40, 40, 0.3)');
+
+            ctx.fillStyle = stainGradient;
+            ctx.beginPath();
+            ctx.moveTo(120, topY - 30);
+            ctx.bezierCurveTo(110, topY + 50, 150, topY + 100, 140, baseY);
+            ctx.bezierCurveTo(175, baseY - 20, 200, topY + 60, 190, topY - 30);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+
+            // Add a subtle border around tombstone
+            ctx.strokeStyle = 'rgba(40, 40, 40, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(100, baseY);
+            ctx.lineTo(100, topY);
+            ctx.bezierCurveTo(100, topY - 80, 260, topY - 80, 260, topY);
+            ctx.lineTo(260, baseY);
+            ctx.stroke();
+
+
+
+            // "R.I.P." Text with shadow and inset effect - aged appearance
+            ctx.fillStyle = '#333333'; // Shadow color
             ctx.font = 'bold 50px serif';
             ctx.textAlign = 'center';
-            ctx.fillText('R.I.P.', 180, 280);
+            ctx.fillText('R.I.P.', centerX + 2, topY + 62);
+
+            ctx.fillStyle = '#d0d0d0'; // Text color
+            ctx.fillText('R.I.P.', centerX, topY + 60);
+
+            // Add a weathered decorative cross above the text
+            ctx.strokeStyle = '#d0d0d0';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(centerX, topY - 30);
+            ctx.lineTo(centerX, topY);
+            ctx.moveTo(centerX - 15, topY - 15);
+            ctx.lineTo(centerX + 15, topY - 15);
+            ctx.stroke();
+
+            // Add some ivy/vines on one side
+            ctx.strokeStyle = '#3a5a40';
+            ctx.lineWidth = 1.5;
+
+            // Main vine
+            ctx.beginPath();
+            ctx.moveTo(100, baseY - 100);
+            ctx.bezierCurveTo(110, baseY - 120, 90, baseY - 150, 105, baseY - 180);
+            ctx.stroke();
+
+            // Branch vines
+            for (let i = 0; i < 5; i++) {
+                const startY = baseY - 100 - (i * 20);
+                ctx.beginPath();
+                ctx.moveTo(100 + (i * 1), startY);
+                ctx.bezierCurveTo(
+                    110 + (i * 5), startY - 10,
+                    120 + (i * 5), startY - 5,
+                    130 + (i * 3), startY - 15
+                );
+                ctx.stroke();
+            }
+
+            // Leaves on vines
+            ctx.fillStyle = '#4a6741';
+            for (let i = 0; i < 12; i++) {
+                const leafX = 100 + Math.random() * 30;
+                const leafY = baseY - 100 - (Math.random() * 80);
+                const leafSize = 3 + Math.random() * 5;
+
+                ctx.beginPath();
+                ctx.arc(leafX, leafY, leafSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
         });
     </script>
 </body>
