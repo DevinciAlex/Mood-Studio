@@ -7,14 +7,21 @@ let fireworkRockets = [];
 let fireworkTrails = [];
 let lastRocketTime = 0;
 let lastGoldenLaunchTime = 0;
-const rocketFrequency = 300; // ms between rockets
-const goldenLauncherFrequency = 300; // ms between golden launcher shots
+const baseRocketFrequency = 500; // Base ms between rockets
+const baseGoldenLauncherFrequency = 500; // Base ms between golden launcher shots
+let rocketFrequency = baseRocketFrequency; // Dynamic frequency
+let goldenLauncherFrequency = baseGoldenLauncherFrequency; // Dynamic frequency
 
 // FPS counter variables
 let frameCount = 0;
 let lastFpsUpdateTime = 0;
 let currentFps = 0;
 let showFps = true;
+
+// Performance control variables
+let particleDensity = 1.0; // Scale factor for particle counts (1.0 = 100%)
+let fpsThreshold = 20; // Below this FPS, stop launching new fireworks
+let adaptiveEnabled = true; // Toggle for adaptive performance
 
 // Add a debug flag to control label visibility
 let showDebugLabels = false;
@@ -89,6 +96,11 @@ function startFireworks() {
 	fireworksActive = true;
 	frameCount = 0;
 	lastFpsUpdateTime = performance.now();
+	lastRocketTime = performance.now(); // Reset timers on start
+	lastGoldenLaunchTime = performance.now();
+	rocketFrequency = baseRocketFrequency; // Start with base frequency
+	goldenLauncherFrequency = baseGoldenLauncherFrequency;
+	particleDensity = 1.0; // Start with full density
 	animateFireworks();
 }
 
@@ -104,20 +116,28 @@ function animateFireworks() {
 		currentFps = Math.round((frameCount * 1000) / (now - lastFpsUpdateTime));
 		frameCount = 0;
 		lastFpsUpdateTime = now;
+
+		// Dynamically adjust particle density and launch rates based on FPS
+		if (adaptiveEnabled) {
+			adjustPerformanceParameters(currentFps);
+		}
 	}
 
 	// Clear canvas with a fade effect
 	fireworksCtx.fillStyle = "rgba(0, 0, 0, 0.15)";
 	fireworksCtx.fillRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
 
-	// Create new rocket at intervals
-	if (now - lastRocketTime > rocketFrequency) {
+	// Create new rocket at intervals if FPS is acceptable
+	if (currentFps > fpsThreshold && now - lastRocketTime > rocketFrequency) {
 		createFireworkRocket();
 		lastRocketTime = now;
 	}
 
-	// Launch golden particles from the bottom
-	if (now - lastGoldenLaunchTime > goldenLauncherFrequency) {
+	// Launch golden particles from the bottom if FPS is acceptable
+	if (
+		currentFps > fpsThreshold &&
+		now - lastGoldenLaunchTime > goldenLauncherFrequency
+	) {
 		createGoldenLauncher();
 		lastGoldenLaunchTime = now;
 	}
@@ -134,13 +154,33 @@ function animateFireworks() {
 	requestAnimationFrame(animateFireworks);
 }
 
+// New function to adjust performance parameters based on FPS
+function adjustPerformanceParameters(fps) {
+	if (fps < 25) {
+		// Poor performance - reduce particles substantially
+		particleDensity = 0.3;
+		rocketFrequency = baseRocketFrequency * 3; // 3x slower launches
+		goldenLauncherFrequency = baseGoldenLauncherFrequency * 3;
+	} else if (fps < 40) {
+		// Moderate performance - reduce particles somewhat
+		particleDensity = 0.6;
+		rocketFrequency = baseRocketFrequency * 1.5; // 1.5x slower launches
+		goldenLauncherFrequency = baseGoldenLauncherFrequency * 1.5;
+	} else {
+		// Good performance - full particle count
+		particleDensity = 1.0;
+		rocketFrequency = baseRocketFrequency; // Normal launch frequency
+		goldenLauncherFrequency = baseGoldenLauncherFrequency;
+	}
+}
+
 // Draw FPS counter in top right corner
 function drawFpsCounter() {
 	fireworksCtx.save();
 	fireworksCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
 	fireworksCtx.fillRect(fireworksCanvas.width - 120, 10, 110, 30);
 	fireworksCtx.font = "bold 16px Arial";
-	fireworksCtx.fillStyle = "#FFFFFF";
+	fireworksCtx.fillStyle = currentFps < fpsThreshold ? "#FF0000" : "#FFFFFF"; // Red text when FPS is low
 	fireworksCtx.textAlign = "right";
 	fireworksCtx.textBaseline = "middle";
 	fireworksCtx.fillText(`FPS: ${currentFps}`, fireworksCanvas.width - 15, 25);
@@ -216,8 +256,11 @@ function updateFireworksAnimation() {
 			const xOffset = Math.sin(rocket.wobble.offset) * rocket.wobble.amplitude;
 			rocket.x += xOffset;
 
-			// Create trail particles
-			if (rocket.hasTrail && Math.random() < 1 / rocket.trailFrequency) {
+			// Create trail particles with reduced frequency based on performance
+			if (
+				rocket.hasTrail &&
+				Math.random() < 1 / (rocket.trailFrequency * (2 - particleDensity))
+			) {
 				createTrailParticle(rocket);
 			}
 
@@ -279,9 +322,25 @@ function updateFireworksAnimation() {
 			particle.vx += (Math.random() - 0.5) * particle.wind;
 		}
 
+		// Remove particles that go offscreen to improve performance
+		if (
+			particle.x < -100 ||
+			particle.x > fireworksCanvas.width + 100 ||
+			particle.y < -100 ||
+			particle.y > fireworksCanvas.height + 100
+		) {
+			fireworkParticles.splice(i, 1);
+			continue;
+		}
+
 		// Ensure coordinates are valid before drawing
 		if (!isFinite(particle.x) || !isFinite(particle.y)) {
 			fireworkParticles.splice(i, 1);
+			continue;
+		}
+
+		// Skip drawing very small or nearly transparent particles
+		if (particle.size * particle.life < 0.3 || particle.life < 0.1) {
 			continue;
 		}
 
@@ -502,11 +561,16 @@ function createExplosionFlash(rocket) {
 
 // New function for creating golden particle launchers
 function createGoldenLauncher() {
-	const launcherCount = 1 + Math.floor(Math.random() * 3);
+	const launcherCount = 1 + Math.floor(Math.random() * 3 * particleDensity);
 
 	for (let i = 0; i < launcherCount; i++) {
 		const x = Math.random() * fireworksCanvas.width;
-		const particleCount = 5 + Math.floor(Math.random() * 10);
+		// Apply particle density to control particle count
+		const baseParticleCount = 5 + Math.floor(Math.random() * 10);
+		const particleCount = Math.max(
+			3,
+			Math.floor(baseParticleCount * particleDensity)
+		);
 
 		// Gold color theme
 		const goldColors = [
@@ -544,7 +608,12 @@ function createGoldenLauncher() {
 
 // New cascade explosion that creates secondary exploding particles
 function createCascadeExplosion(rocket) {
-	const particleCount = 30 + Math.floor(Math.random() * 20);
+	// Apply particle density to control particle count
+	const baseParticleCount = 30 + Math.floor(Math.random() * 20);
+	const particleCount = Math.max(
+		15,
+		Math.floor(baseParticleCount * particleDensity)
+	);
 	const colors = rocket.colorTheme.palette;
 
 	for (let i = 0; i < particleCount; i++) {
@@ -576,7 +645,12 @@ function createCascadeExplosion(rocket) {
 
 // Create an explosion from a secondary particle
 function createSecondaryExplosion(particle) {
-	const particleCount = 5 + Math.floor(Math.random() * 5);
+	// Apply particle density to control particle count
+	const baseParticleCount = 5 + Math.floor(Math.random() * 5);
+	const particleCount = Math.max(
+		3,
+		Math.floor(baseParticleCount * particleDensity)
+	);
 
 	for (let i = 0; i < particleCount; i++) {
 		const angle = Math.random() * Math.PI * 2;
@@ -613,7 +687,12 @@ function createSecondaryExplosion(particle) {
 }
 
 function createCircleExplosion(rocket) {
-	const particleCount = 80 + Math.floor(Math.random() * 50);
+	// Apply particle density to control particle count
+	const baseParticleCount = 80 + Math.floor(Math.random() * 50);
+	const particleCount = Math.max(
+		20,
+		Math.floor(baseParticleCount * particleDensity)
+	);
 	const colors = rocket.colorTheme.palette;
 
 	for (let i = 0; i < particleCount; i++) {
@@ -638,9 +717,14 @@ function createCircleExplosion(rocket) {
 	}
 }
 
-// Modified function with doubled gravity
+// Modified function with reduced particles
 function createRingExplosion(rocket) {
-	const particleCount = 100;
+	// Apply particle density to control particle count
+	const baseParticleCount = 100;
+	const particleCount = Math.max(
+		30,
+		Math.floor(baseParticleCount * particleDensity)
+	);
 	const colors = rocket.colorTheme.palette;
 	const speed = 2 + Math.random() * 1.5;
 
@@ -656,9 +740,9 @@ function createRingExplosion(rocket) {
 			vy: Math.sin(angle) * speed,
 			color: color,
 			size: 1.2 + Math.random(),
-			life: 0.6 + Math.random() * 0.4,
+			life: 1.1 + Math.random() * 0.4,
 			decay: 0.015,
-			gravity: 0.01, // Gravity now doubled in update function
+			gravity: 0.005, // Gravity now doubled in update function
 			glow: true,
 		});
 	}
@@ -747,7 +831,7 @@ function createHeartExplosion(rocket) {
 			size: particleSize,
 			life: 0.9 + Math.random() * 0.2,
 			decay: 0.007, // Slower decay for better visibility
-			gravity: 0.003, // Less gravity to maintain shape
+			gravity: 0.008, // Less gravity to maintain shape
 			glow: true,
 			sparkle: Math.random() > 0.7,
 			heartParticle: true, // Mark as heart particle for special treatment
@@ -787,7 +871,7 @@ function createHeartExplosion(rocket) {
 			size: 2.5, // Larger size for outline particles
 			life: 0.95 + Math.random() * 0.15,
 			decay: 0.006,
-			gravity: 0.002, // Even less gravity for outline
+			gravity: 0.007, // Even less gravity for outline
 			glow: true,
 			sparkle: true,
 		});
@@ -929,14 +1013,14 @@ function createChrysanthemumExplosion(rocket) {
 	}
 }
 function createCrossetteExplosion(rocket) {
-	// First create a more dramatic initial burst
-	const initialCount = 80; // Increased from 50
+	// Reduce initial burst particles by 75%
+	const initialCount = 80; // Reduced from 80
 	const colors = rocket.colorTheme.palette;
 
-	// Initial burst particles
+	// Initial burst particles - significantly reduced
 	for (let i = 0; i < initialCount; i++) {
 		const angle = Math.random() * Math.PI * 2;
-		const speed = 3 + Math.random() * 1.5; // Increased speed range
+		const speed = 2 + Math.random() * 1.5; // Slightly reduced speed
 		const color = colors[i % colors.length];
 
 		fireworkParticles.push({
@@ -945,26 +1029,24 @@ function createCrossetteExplosion(rocket) {
 			vx: Math.cos(angle) * speed,
 			vy: Math.sin(angle) * speed,
 			color: color,
-			size: 1.2 + Math.random() * 0.8, // Larger size range
-			life: 0.5 + Math.random() * 0.2, // Slightly longer life
-			decay: 0.005, // Adjusted decay
+			size: 1.6 + Math.random() * 0.8,
+			life: 0.5 + Math.random() * 0.2,
+			decay: 0.006, // Slightly faster decay
 			gravity: 0.015,
 			glow: true,
-			sparkle: Math.random() > 0.7, // Add some sparkles to initial burst
+			sparkle: Math.random() > 0.8, // Fewer sparkles
 		});
 	}
 
-	// Create crossettes with staggered timing for more dynamic effect
-	const crossetteCount = 8 + Math.floor(Math.random() * 3); // Increased count
+	// Reduce the number of crossettes by 60%
+	const crossetteCount = 3 + Math.floor(Math.random() * 2); // Reduced from 8+
 
 	for (let i = 0; i < crossetteCount; i++) {
 		const angle = (i / crossetteCount) * Math.PI * 2;
-		const distance = 100 + Math.random() * 30; // Increased distance for wider spread
-		const delay = 200 + Math.random() * 150; // Staggered launch timing (0-150ms)
+		const distance = 80 + Math.random() * 20; // Reduced distance
+		const delay = 200 + Math.random() * 150;
 
-		// Use setTimeout for staggered effect
 		setTimeout(() => {
-			// Calculate position for this crossette
 			const posX = rocket.x + Math.cos(angle) * distance;
 			const posY = rocket.y + Math.sin(angle) * distance;
 			const color = colors[i % colors.length];
@@ -976,21 +1058,21 @@ function createCrossetteExplosion(rocket) {
 				vx: 0,
 				vy: 0,
 				color: "#FFFFFF",
-				size: 4,
-				life: 0.6,
-				decay: 0.1,
+				size: 3, // Slightly smaller flash
+				life: 1, // Shorter life
+				decay: 0.012, // Faster decay
 				glow: true,
 			});
 
-			// Create 6-8 arms for each cross (more arms than before)
-			const armCount = 6 + Math.floor(Math.random() * 3);
+			// Reduce number of arms per crossette
+			const armCount = 4; // Reduced from 6-8
 			for (let arm = 0; arm < armCount; arm++) {
-				const baseAngle = (arm * Math.PI * 2) / armCount; // Evenly spaced arms
-				const armLength = 12 + Math.floor(Math.random() * 8); // Longer arms
+				const baseAngle = (arm * Math.PI * 2) / armCount;
+				// Reduce particles per arm by 50%
+				const armLength = 6 + Math.floor(Math.random() * 3); // Reduced from 12+
 
 				for (let j = 0; j < armLength; j++) {
-					const particleSpeed = 0.8 + j * 0.25; // Faster speed increase along arm
-					// Small angle variation with increasing variance toward tip
+					const particleSpeed = 0.8 + j * 0.25;
 					const angleVariance =
 						(Math.random() - 0.5) * 0.15 * (1 + j / armLength);
 					const particleAngle = baseAngle + angleVariance;
@@ -1000,33 +1082,33 @@ function createCrossetteExplosion(rocket) {
 						y: posY,
 						vx: Math.cos(particleAngle) * particleSpeed,
 						vy: Math.sin(particleAngle) * particleSpeed,
-						color: j % 3 === 0 ? "#FFFFFF" : color, // Add white particles for contrast
-						size: 1.8 - j * 0.08,
-						life: 0.8 - j * 0.04, // Longer life
-						decay: 0.012 + j * 0.001,
+						color: j % 3 === 0 ? "#FFFFFF" : color,
+						size: 1.6 - j * 0.08,
+						life: 0.7 - j * 0.04,
+						decay: 0.014 + j * 0.001, // Faster decay
 						gravity: 0.01,
 						glow: true,
-						sparkle: j > armLength * 0.7, // More sparkles toward arm tips
-						sparkleColor: j === armLength - 1 ? "#FFFFFF" : color, // White sparkles at tips
+						sparkle: j === armLength - 1, // Only sparkle at the tip
 					});
 				}
 			}
 
-			// Add tracing particles that follow behind each arm
-			for (let t = 0; t < 30; t++) {
+			// Reduce tracing particles by 80%
+			const traceCount = 6; // Reduced from 30
+			for (let t = 0; t < traceCount; t++) {
 				const traceAngle = Math.random() * Math.PI * 2;
-				const traceSpeed = 0.3 + Math.random() * 0.7; // Slower than main particles
+				const traceSpeed = 0.3 + Math.random() * 0.6;
 
 				fireworkParticles.push({
 					x: posX,
 					y: posY,
 					vx: Math.cos(traceAngle) * traceSpeed,
 					vy: Math.sin(traceAngle) * traceSpeed,
-					color: colors[(i + 1) % colors.length], // Different color than arms
-					size: 0.8 + Math.random() * 0.6,
-					life: 0.6 + Math.random() * 0.3,
-					decay: 0.02,
-					gravity: 0.008, // Less gravity for longer hang time
+					color: colors[(i + 1) % colors.length],
+					size: 0.8 + Math.random() * 0.5,
+					life: 0.5 + Math.random() * 0.2, // Shorter life
+					decay: 0.025, // Faster decay
+					gravity: 0.008,
 					glow: true,
 				});
 			}
@@ -1113,13 +1195,18 @@ function getRandomFireworkColor() {
 	return theme.palette[Math.floor(Math.random() * theme.palette.length)];
 }
 
-// Add keyboard control to toggle FPS display and debug labels
+// Add keyboard control to toggle FPS display, debug labels, and adaptive performance
 document.addEventListener("keydown", (e) => {
 	if (e.key === "f" || e.key === "F") {
 		showFps = !showFps;
 	} else if (e.key === "d" || e.key === "D") {
 		showDebugLabels = !showDebugLabels;
 		console.log(`Debug labels ${showDebugLabels ? "enabled" : "disabled"}`);
+	} else if (e.key === "a" || e.key === "A") {
+		adaptiveEnabled = !adaptiveEnabled;
+		console.log(
+			`Adaptive performance ${adaptiveEnabled ? "enabled" : "disabled"}`
+		);
 	}
 });
 

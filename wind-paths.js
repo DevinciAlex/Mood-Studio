@@ -5,14 +5,28 @@ class WindPathGenerator {
 	}
 
 	generateRandomPath(y, type = "simple") {
+		// Generate random width and blur values
+		const strokeWidth = 1.5 + Math.random() * 3; // Random width between 2 and 5
+		const blurAmount = 0.8 + Math.random() * 4; // Random blur between 1 and 5
+
+		let pathData;
 		switch (type) {
 			case "loop":
-				return this.generateLoopPath(y);
+				pathData = this.generateLoopPath(y);
+				break;
 			case "doubleLoop":
-				return this.generateDoubleLoopPath(y);
+				pathData = this.generateDoubleLoopPath(y);
+				break;
 			default:
-				return this.generateWavyPath(y);
+				pathData = this.generateWavyPath(y);
 		}
+
+		// Return object with path data and styling properties
+		return {
+			d: pathData,
+			strokeWidth,
+			blurAmount,
+		};
 	}
 
 	addWaveEffect(y, magnitude = 1) {
@@ -246,15 +260,19 @@ class WindAnimation {
 			const typeIndex = Math.floor(Math.random() * 3);
 			const type = pathTypes[typeIndex];
 
+			const pathData = this.pathGenerator.generateRandomPath(
+				baseY + i * ySpacing,
+				type
+			);
+
 			const path = document.createElementNS(
 				"http://www.w3.org/2000/svg",
 				"path"
 			);
 			path.setAttribute("class", `wind-path ${type === "simple" ? "" : type}`);
-			path.setAttribute(
-				"d",
-				this.pathGenerator.generateRandomPath(baseY + i * ySpacing, type)
-			);
+			path.setAttribute("d", pathData.d);
+			path.setAttribute("stroke-width", pathData.strokeWidth);
+			path.style.filter = `blur(${pathData.blurAmount}px)`;
 
 			this.svg.appendChild(path);
 		}
@@ -376,15 +394,16 @@ class WindAnimation {
 		const typeIndex = Math.floor(Math.random() * 3);
 		const type = pathTypes[typeIndex];
 
+		const pathData = this.pathGenerator.generateRandomPath(baseY, type);
+
 		const newPath = document.createElementNS(
 			"http://www.w3.org/2000/svg",
 			"path"
 		);
 		newPath.setAttribute("class", `wind-path ${type === "simple" ? "" : type}`);
-		newPath.setAttribute(
-			"d",
-			this.pathGenerator.generateRandomPath(baseY, type)
-		);
+		newPath.setAttribute("d", pathData.d);
+		newPath.setAttribute("stroke-width", pathData.strokeWidth);
+		newPath.style.filter = `blur(${pathData.blurAmount}px)`;
 
 		// Initialize with proper start position
 		const length = newPath.getTotalLength();

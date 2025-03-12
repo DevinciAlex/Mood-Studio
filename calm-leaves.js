@@ -40,23 +40,31 @@ class LeafAnimation {
 		// Clear any existing leaves
 		this.leaves = [];
 
-		// Leaf SVG templates
+		// Leaf SVG templates with outlines and vertical center lines only
 		const leafTemplates = [
-			// Maple leaf
+			// Maple leaf with outline and vertical center line
 			`<svg viewBox="0 0 100 100" class="leaf maple">
-                <path d="M50,0 C45,15 0,30 25,50 C0,65 20,90 50,100 C80,90 100,65 75,50 C100,30 55,15 50,0 Z" />
+                <path class="leaf-body" d="M50,0 C45,15 0,30 25,50 C0,65 20,90 50,100 C80,90 100,65 75,50 C100,30 55,15 50,0 Z" />
+                <path class="leaf-outline" d="M50,0 C45,15 0,30 25,50 C0,65 20,90 50,100 C80,90 100,65 75,50 C100,30 55,15 50,0 Z" />
+                <path class="leaf-center" d="M50,0 L50,100" />
             </svg>`,
-			// Simple leaf
+			// Simple leaf with outline and vertical center line
 			`<svg viewBox="0 0 100 100" class="leaf simple">
-                <path d="M50,0 C25,25 10,40 10,70 C10,90 25,100 50,95 C75,100 90,90 90,70 C90,40 75,25 50,0 Z" />
+                <path class="leaf-body" d="M50,0 C25,25 10,40 10,70 C10,90 25,100 50,95 C75,100 90,90 90,70 C90,40 75,25 50,0 Z" />
+                <path class="leaf-outline" d="M50,0 C25,25 10,40 10,70 C10,90 25,100 50,95 C75,100 90,90 90,70 C90,40 75,25 50,0 Z" />
+                <path class="leaf-center" d="M50,0 L50,95" />
             </svg>`,
-			// Round leaf
+			// Enhanced round leaf with outline and curved vertical center line
 			`<svg viewBox="0 0 100 100" class="leaf round">
-                <path d="M30,10 C10,30 0,50 10,70 C20,90 40,100 60,90 C80,80 100,60 90,40 C80,20 50,0 30,10 Z" />
+                <path class="leaf-body" d="M40,5 C15,15 0,40 5,65 C10,85 35,100 60,90 C85,80 105,50 90,25 C75,5 55,0 40,5 Z" />
+                <path class="leaf-outline" d="M40,5 C15,15 0,40 5,65 C10,85 35,100 60,90 C85,80 105,50 90,25 C75,5 55,0 40,5 Z" />
+                <path class="leaf-center" d="M45,8 C42,35 42,65 58,88" />
             </svg>`,
-			// Pointed leaf
+			// Pointed leaf with outline and vertical center line
 			`<svg viewBox="0 0 100 100" class="leaf pointed">
-                <path d="M50,0 C40,20 10,40 5,60 C0,80 20,95 50,100 C80,95 100,80 95,60 C90,40 60,20 50,0 Z" />
+                <path class="leaf-body" d="M50,0 C40,20 10,40 5,60 C0,80 20,95 50,100 C80,95 100,80 95,60 C90,40 60,20 50,0 Z" />
+                <path class="leaf-outline" d="M50,0 C40,20 10,40 5,60 C0,80 20,95 50,100 C80,95 100,80 95,60 C90,40 60,20 50,0 Z" />
+                <path class="leaf-center" d="M50,0 L50,100" />
             </svg>`,
 		];
 
@@ -98,7 +106,34 @@ class LeafAnimation {
 						: 100 + Math.random() * 40; // Green tones
 				const saturation = 20 + Math.random() * 30;
 				const lightness = 40 + Math.random() * 30;
-				leaf.style.fill = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+				// Style the leaf body
+				const leafBody = leaf.querySelector(".leaf-body");
+				if (leafBody) {
+					leafBody.style.fill = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+				}
+
+				// Style the leaf outline
+				const leafOutline = leaf.querySelector(".leaf-outline");
+				if (leafOutline) {
+					leafOutline.style.fill = "none";
+					leafOutline.style.stroke = `hsl(${hue}, ${
+						saturation - 10
+					}%, ${Math.max(20, lightness - 20)}%)`;
+					leafOutline.style.strokeWidth = "1.5";
+				}
+
+				// Style the leaf center line
+				const leafCenter = leaf.querySelector(".leaf-center");
+				if (leafCenter) {
+					leafCenter.style.fill = "none";
+					leafCenter.style.stroke = `hsl(${hue}, ${saturation - 5}%, ${Math.max(
+						25,
+						lightness - 15
+					)}%)`;
+					leafCenter.style.strokeWidth = "1";
+					leafCenter.style.strokeDasharray = "1.5,1.5";
+				}
 			}
 
 			// Add to container and store reference
